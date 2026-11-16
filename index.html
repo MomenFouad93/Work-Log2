@@ -50,6 +50,7 @@ textarea{min-height:96px;resize:vertical}
 .item{background:#fff;border:1px solid var(--line);border-right:5px solid var(--coral);border-radius:12px;padding:11px 12px;margin-bottom:9px}
 .item .top{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted)}
 .item .ti{font-weight:700;color:var(--navy);margin:4px 0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.chips button{border:1px solid #c5cbe0;background:#fff;color:var(--navy);border-radius:20px;padding:8px 12px;font-size:14px;font-weight:700}.chips button.on{background:var(--coral);border-color:var(--coral);color:#fff}
 .chip{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:700;background:var(--lblue);color:var(--navy);margin-inline-end:4px}
 nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:env(safe-area-inset-bottom);z-index:6}
 nav button{background:none;border:0;padding:9px 2px 8px;font-size:12px;color:var(--muted);font-weight:700}
@@ -93,9 +94,14 @@ dl{display:grid;grid-template-columns:100px 1fr;gap:6px 10px;font-size:14px;marg
   <div class="hint" id="installHint" style="display:none">مهم: اضغط زر المشاركة في Safari ثم <b>Add to Home Screen</b> وافتح التطبيق من الأيقونة <b>قبل ما تسجل أي حاجة</b>. اللي بيتسجل في Safari بيبقى منفصل عن اللي في الأيقونة، وSafari بيمسحه لو ما فتحتش الصفحة أسبوع.</div>
   <div class="hint" id="backupHint" style="display:none">مفيش نسخة احتياطية من شغلك من فترة. روح <b>إعدادات</b> واضغط <b>ابعت ملف الإكسل</b>.</div>
   <div class="card">
+    <h3>اختار النوع الأول (اختياري)</h3>
+    <div class="chips" id="chips"></div>
+    <div class="muted" id="pickState" style="margin-top:6px"></div>
+  </div>
+  <div class="card">
     <h3>احكي اللي عملته</h3>
     <button class="mic" id="micBtn" aria-label="تسجيل صوتي"><svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V22h2v-3.08A7 7 0 0 0 19 12z"/></svg></button>
-    <div class="center muted" id="micState">اضغط وتكلم، أو اكتب تحت</div>
+    <div class="center muted" id="micState">اضغط وتكلم، أو اكتب تحت</div><div class="muted" style="font-size:12px;margin-top:4px">قول كلمات الإنجليزي زي ما هي (changeover، spare)، وراجع الكلام قبل ما تضغط رتّب.</div>
     <div class="row2" style="margin-top:8px"><div><label>لغة الكلام</label><select id="lang"><option value="ar-EG">عربي (مصر)</option><option value="en-US">English</option></select></div><div style="display:flex;align-items:end"><button class="btn ghost block" id="manualBtn">أكتب بالإيد</button></div></div>
     <textarea id="txt" dir="auto" placeholder="مثال: امبارح صلحت عطل الهيتر في ماكينة M92 خط 3 وكانت واقفة ساعتين، وفرت 5000 جنيه"></textarea>
     <button class="btn navy block" id="analyzeBtn" style="margin-top:8px">رتّب الكلام في الخانات</button>
@@ -107,6 +113,7 @@ dl{display:grid;grid-template-columns:100px 1fr;gap:6px 10px;font-size:14px;marg
     <div class="row2"><div><label>التاريخ</label><input type="date" id="fDate"></div><div><label>الحالة</label><select id="fStatus"><option value="Done">تم (Done)</option><option value="Ongoing">شغال (Ongoing)</option><option value="Planned">مخطط (Planned)</option></select></div></div>
     <label>الماكينة</label><select id="fMachine"></select>
     <label>نوع الشغل</label><select id="fCat"></select>
+    <label>قطع الغيار (اسم / كود / كمية)</label><input id="fParts" dir="auto">
     <label>العنوان</label><input id="fTitle" dir="auto" maxlength="120">
     <label>اللي اتعمل</label><textarea id="fDesc" dir="auto"></textarea>
     <label>النتيجة / الأثر</label><input id="fImpact" dir="auto" placeholder="مثال: الخط رجع للسرعة العادية">
@@ -189,8 +196,13 @@ const CATS=[
  ["Safety","سلامة",["سلامه","امان","safety","حمايه","guard","interlock","loto","lockout","خطر","اصابه"]],
  ["GMP / Quality","جودة / GMP",["جوده","gmp","معايره","calibration","تاهيل","qualification","توثيق","deviation","انحراف","validation","sop","audit","تدقيق"]],
  ["Energy & Utilities","طاقة ومرافق",["كهرباء","طاقه","تسريب هواء","تسريب","air leak","energy","مياه","استهلاك","ترشيد","هواء مضغوط","بخار"]],
- ["Training & Knowledge","تدريب ومعرفة",["دربت","تدريب","شرحت","opl","training","علمت","محاضره","كتبت دليل"]]
+ ["Training & Knowledge","تدريب ومعرفة",["دربت","تدريب","شرحت","opl","training","علمت","محاضره","كتبت دليل"]],
+ ["Changeover","تشيفمنت / تغيير منتج",["تشيفمنت","تشيفمن","تشيف منت","تشينج اوفر","تشينجوفر","شينج اوفر","شينجوفر","تشينج اوير","changeover","change over","change-over","changement","changeovers"]],
+ ["Warehouse Issue","صرف من المخزن",["صرف","صرفت","هصرف","من المخزن","المخزن","مخزن","warehouse","issue","issued","withdraw"]],
+ ["Spare Parts Needed","محتاج قطع غيار",["محتاج","محتاجين","هشتري","اشتري","نشتري","شراء","مطلوب","قطع غيار","need","purchase","buy","order"]],
+ ["Spare Parts Used","استخدمت قطع غيار",["استخدمت","استعملت","used","قطع غيار","spare","spares","بدلت","ركبت قطعه"]]
 ];
+const SPARE=["Spare Parts Needed","Spare Parts Used","Warehouse Issue"];
 const BUILTIN=[
  ["GEA PMA 800 / FBD 600 (Gran L1)","Acacia","Granulation L1 (R06)","gea 1,gea1,pma 800,pma800,fbd 600,تحبيب 1,خط التحبيب 1,gran l1,granulation 1,جي ايه 1"],
  ["GEA Pharmaconnect 120 / FBD 150 (Gran L2)","Acacia","Granulation L2 (R21)","gea 2,gea2,pharmaconnect,فارماكونكت,fbd 150,تحبيب 2,خط التحبيب 2,gran l2,granulation 2,جي ايه 2"],
@@ -255,7 +267,8 @@ function findCategory(nt){
 }
 function mult(w){return w&&/^(الف|الاف|k)$/.test(w)?1000:1}
 function parseText(raw){
-  const nt=norm(raw).replace(/(\d)[,\u066C](?=\d{3}(?!\d))/g,"$1"),out={date:today(),machine:null,category:findCategory(nt),title:"",desc:raw.trim(),impact:"",dt:"",sav:"",evidence:"",status:"Done"};
+  const nt=norm(raw).replace(/(\d)[,\u066C](?=\d{3}(?!\d))/g,"$1"),out={date:today(),machine:null,category:findCategory(nt),title:"",desc:raw.trim(),impact:"",dt:"",sav:"",evidence:"",status:"Done",parts:""};
+  if(SPARE.includes(out.category))out.parts=raw.trim();
   const m=findMachine(nt);if(m)out.machine=m.name;
   // date
   if(/اول امبارح|اول مبارح|day before yesterday/.test(nt))out.date=iso(new Date(Date.now()-2*864e5));
@@ -282,7 +295,12 @@ function parseText(raw){
 }
 
 /* ---------------- add / edit form ---------------- */
-let editId=null,usedMic=false,draftText="";
+let editId=null,usedMic=false,draftText="",pendingCat=null;
+const QUICK=[["Changeover","تشيفمنت"],["Warehouse Issue","صرف من المخزن"],["Spare Parts Needed","محتاج قطع غيار"],["Spare Parts Used","استخدمت قطع غيار"],["Breakdown Fixed","عطل"],["Achievement","إنجاز"]];
+function renderChips(){
+  $("#chips").innerHTML=QUICK.map(q=>`<button data-c="${q[0]}" class="${pendingCat===q[0]?"on":""}">${q[1]}</button>`).join("");
+  $$("#chips button").forEach(b=>b.onclick=()=>{pendingCat=pendingCat===b.dataset.c?null:b.dataset.c;renderChips();$("#pickState").textContent=pendingCat?"النوع المختار: "+catAr(pendingCat)+". هيتطبق على اللي هتسجله":""});
+}
 function fillSelects(){
   const mSel=$("#fMachine"),cur=mSel.value;
   mSel.innerHTML='<option value="">اختار الماكينة</option>'+machines().map(m=>`<option>${esc(m.name)}</option>`).join("");if(cur)mSel.value=cur;
@@ -292,7 +310,7 @@ function fillSelects(){
 function showForm(o,note,title){
   $("#formCard").style.display="block";$("#formTitle").textContent=title||"راجع وسجّل";
   $("#fDate").value=o.date||today();$("#fStatus").value=o.status||"Done";
-  $("#fMachine").value=o.machine||"";$("#fCat").value=o.category||"Achievement";
+  $("#fMachine").value=o.machine||"";$("#fCat").value=o.category||"Achievement";$("#fParts").value=o.parts||"";
   $("#fTitle").value=o.title||"";$("#fDesc").value=o.desc||"";$("#fImpact").value=o.impact||"";
   $("#fDt").value=o.dt===""||o.dt==null?"":o.dt;$("#fSav").value=o.sav===""||o.sav==null?"":o.sav;$("#fEv").value=o.evidence||"";
   $("#parseNote").textContent=note||"";
@@ -300,11 +318,11 @@ function showForm(o,note,title){
 }
 function analyze(){
   const t=$("#txt").value.trim();if(!t){toast("اكتب أو سجّل كلام الأول");return}
-  editId=null;draftText=t;const o=parseText(t);
+  editId=null;draftText=t;const o=parseText(t);if(pendingCat){o.category=pendingCat;if(!SPARE.includes(pendingCat))o.parts="";else if(!o.parts)o.parts=t}
   const miss=[];if(!o.machine)miss.push("الماكينة");
   showForm(o,"الخانات اتعبت من كلامك. راجعها وصحح اللي غلط"+(miss.length?". ما لقيتش: "+miss.join("، "):""),"راجع وسجّل");
 }
-function clearDraft(){editId=null;usedMic=false;draftText="";$("#txt").value="";$("#formCard").style.display="none"}
+function clearDraft(){editId=null;usedMic=false;draftText="";pendingCat=null;renderChips();$("#pickState").textContent="";$("#txt").value="";$("#formCard").style.display="none"}
 function saveEntry(){
   const date=$("#fDate").value,machine=$("#fMachine").value,cat=$("#fCat").value;let title=$("#fTitle").value.trim();const desc=$("#fDesc").value.trim();
   if(!fromIso(date))return toast("اكتب تاريخ صحيح");
@@ -313,7 +331,7 @@ function saveEntry(){
   if(!title)return toast("اكتب عنوان");
   const mm=machines().find(m=>m.name===machine)||{building:"",area:""};
   const num=v=>{v=String(v).trim();return v===""||isNaN(+v)||+v<0?"":+v};
-  const rec={date,machine,building:mm.building,area:mm.area,category:cat,title,desc,impact:$("#fImpact").value.trim(),dt:num($("#fDt").value),sav:num($("#fSav").value),evidence:$("#fEv").value.trim(),status:$("#fStatus").value};
+  const rec={date,machine,building:mm.building,area:mm.area,category:cat,title,desc,parts:$("#fParts").value.trim(),impact:$("#fImpact").value.trim(),dt:num($("#fDt").value),sav:num($("#fSav").value),evidence:$("#fEv").value.trim(),status:$("#fStatus").value};
   if(editId){const i=S.entries.findIndex(e=>e.id===editId);if(i>=0)S.entries[i]=Object.assign(S.entries[i],rec)}
   else{rec.id=newId(date);rec.source=draftText?(usedMic?"Voice note":"Text message"):"Manual";rec.text=draftText;rec.loggedAt=new Date().toISOString();S.entries.push(rec)}
   if(editId&&!S.entries.some(e=>e.id===editId)){toast("الشغلانة دي اتمسحت");return}
@@ -333,7 +351,7 @@ $("#micBtn").onclick=()=>{
     baseTxt=$("#txt").value?$("#txt").value.trim()+" ":"";let got=false,err=false;
     r.onresult=e=>{if(rec!==r)return;got=true;usedMic=true;let t="";for(let i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;$("#txt").value=baseTxt+t};
     r.onerror=e=>{if(rec!==r)return;err=true;micUI(false);toast(e.error==="not-allowed"||e.error==="service-not-allowed"?"اسمح للميكروفون وفعّل Dictation من إعدادات الموبايل":e.error==="no-speech"?"ما سمعتش حاجة، جرب تاني":"الصوت وقف: "+(e.error||""))};
-    r.onend=()=>{if(rec!==r)return;micUI(false);if(got&&!err&&$("#txt").value.trim())analyze()};
+    r.onend=()=>{if(rec!==r)return;micUI(false);if(got&&!err&&$("#txt").value.trim())toast("راجع الكلام واضغط رتّب")};
     r.start();micUI(true);
   }catch(e){micUI(false);toast("مقدرتش أشغل الميكروفون")}
 };
@@ -418,7 +436,7 @@ function buildXlsx(){
   rows.push(`<row r="4" ht="32" customHeight="1">${HEAD.map((h,i)=>cell(4,i,h,1)).join("")}</row>`);
   E.forEach((e,i)=>{const r=5+i,d=fromIso(e.date),lg=e.loggedAt?new Date(e.loggedAt):null;
     const lgSer=lg&&!isNaN(lg)?Math.round(((lg.getTime()-lg.getTimezoneOffset()*6e4)/864e5+25569)*1e5)/1e5:"";
-    const vals=[e.id,d?serial(d):"",p.name,p.role,e.building,e.area,e.machine,e.category,e.title,e.desc,e.impact,e.dt===""?"":+e.dt,e.sav===""?"":+e.sav,e.evidence,e.status,"Pending","",e.source,e.text,lgSer];
+    const vals=[e.id,d?serial(d):"",p.name,p.role,e.building,e.area,e.machine,e.category,e.title,(e.desc||"")+(e.parts&&e.parts!==e.desc?(e.desc?" | ":"")+"Parts: "+e.parts:""),e.impact,e.dt===""?"":+e.dt,e.sav===""?"":+e.sav,e.evidence,e.status,"Pending","",e.source,e.text,lgSer];
     const st=[0,2,0,0,0,0,0,0,7,7,7,0,0,7,0,0,0,0,7,3];
     rows.push(`<row r="${r}">${vals.map((v,c)=>cell(r,c,v,st[c])).join("")}</row>`)});
   const widths=[14,13,18,11,11,16,28,20,30,46,32,11,12,22,10,10,15,12,42,17];
@@ -481,7 +499,7 @@ $("#manualBtn").onclick=()=>{editId=null;usedMic=false;draftText="";showForm({da
 $("#saveBtn").onclick=saveEntry;$("#cancelBtn").onclick=clearDraft;
 $("#gGo").onclick=()=>{const n=$("#gName").value.trim();if(!n)return toast("اكتب اسمك");S.profile={name:n,role:$("#gRole").value};save();$("#gate").classList.remove("show");renderAll();try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}};
 (function(){let p=[];for(let i=0;i<16;i++){const a=Math.PI*i/8-Math.PI/2,r=i%2?7.6:18;p.push((r*Math.cos(a)).toFixed(2)+","+(r*Math.sin(a)).toFixed(2))}$("#hstar").setAttribute("points",p.join(" "))})();
-renderAll();
+renderChips();renderAll();
 if(!S.profile)$("#gate").classList.add("show");
 if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
