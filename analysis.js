@@ -109,7 +109,7 @@ function stepHead(){const l=A3_IMPACT.map(([k,n])=>`<button type="button" data-i
 function stepProb(){return fieldsStep([["a3.what","What happened? إيه اللي حصل","ta",3],["a3.who","Who? مين اكتشفها","in"],["a3.where","Where? حصلت فين","in"],["a3.when_date","When? التاريخ","date"],["a3.when_time","Time / Shift","in"],["a3.how_know","How do we know? إزاي عرفنا","in"],["a3.how_much","How much? (KPI، خسائر، وقت، جنيه)","ta",2],["a3.redefined","Redefine problem statement: المعيار، الفعلي، الفجوة بالأرقام","ta",2]])}
 function stepFish(){
   return '<div class="muted" style="margin-bottom:8px">اكتب كل سبب محتمل في سطر (حد أقصى 6). اضغط على اقتراح عشان يتضاف.</div>'+FISH.map(([k,en,ar])=>{const cur=AD.data.a3.fishbone[k]||[];
-    return `<label>${en} <small class="muted">${ar}</small></label><textarea data-fish="${k}" dir="auto" rows="2">${esc(cur.join("\n"))}</textarea><div class="chips" style="margin-top:4px">${TYPICAL[k].filter(t=>!cur.includes(t)).map(t=>`<button type="button" class="gl" data-chip="${k}|${esc(t)}">+ ${esc(t)}</button>`).join("")}</div>`}).join("")
+    return `<label>${en}${isEN()?"":` <small class="muted">${ar}</small>`}</label><textarea data-fish="${k}" dir="auto" rows="2">${esc(cur.join("\n"))}</textarea><div class="chips" style="margin-top:4px">${TYPICAL[k].filter(t=>!cur.includes(t)).map(t=>`<button type="button" class="gl" data-chip="${k}|${esc(t)}">+ ${esc(t)}</button>`).join("")}</div>`}).join("")
    +fieldsStep([["a3.plausible","أرجح سبب أساسي (More plausible primary cause)","ta",2]]);
 }
 function stepWhys(){
@@ -250,7 +250,7 @@ $("#anZin").onclick=()=>{vz=Math.min(1.6,vz+0.15);applyZoom()};$("#anZout").oncl
 $("#anVClose").onclick=()=>$("#anView").classList.remove("show");
 $("#anVPrint").onclick=()=>{const z=$("#anSheet").style.zoom;$("#anSheet").style.zoom=1;window.print();$("#anSheet").style.zoom=z};
 $("#anVEdit").onclick=()=>{$("#anView").classList.remove("show");openWizard(VA,AD&&AD.id===VA.id?anStep:1)};
-$("#anVDel").onclick=()=>{if(!confirm("تمسح التحليل ده؟"))return;S.analyses=ANS().filter(x=>x.id!==VA.id);save();$("#anView").classList.remove("show");renderAn();toast("اتمسح")};
+$("#anVDel").onclick=()=>{if(!confirm(tr("تمسح التحليل ده؟")))return;S.analyses=ANS().filter(x=>x.id!==VA.id);save();$("#anView").classList.remove("show");renderAn();toast("اتمسح")};
 $("#anVCopy").onclick=()=>{const c=JSON.parse(JSON.stringify(VA));delete c.example;c.id=uid();c.entryId=null;c.status="draft";c.note=undefined;c.title=VA.title+" (copy)";const k=cleanAnalysis(c);if(!k)return toast("تعذّر النسخ");AD=k;anSave();$("#anView").classList.remove("show");openWizard(AD,1);toast("اتنسخ لتحليلاتي. عدّل عليه")};
 $("#anVXlsx").onclick=async()=>{try{toast("بجهز الإكسل...");const b=await exportAnalysisXlsx(VA);await shareBlob(b,`${VA.type}_${(VA.title||"analysis").replace(/[^\w؀-ۿ]+/g,"_").slice(0,30)}_${today()}.xlsx`,"تحليل "+VA.type)}catch(e){console.error(e);toast("الإكسل ماطلعش. ممكن تعمل طباعة PDF بدله")}};
 
@@ -379,7 +379,7 @@ async function exportAnalysisXlsx(A){
 
 /* ---------- list tab ---------- */
 function anCard(a){
-  return `<div class="item" data-an="${esc(a.id)}" style="border-right-color:${a.type==="3C"?"#47BFD9":"#F55B41"}"><div class="top"><span>${esc(a.date||"")}</span><span><b>${a.type}</b>${a.example?" · مثال":""}${a.status==="draft"?" · مسودة":""}</span></div><div class="ti" dir="auto">${esc(a.title_ar||a.title||"")}</div><div><span class="chip">${esc(a.machine||"")}</span>${a.title_ar?`<span class="chip" style="background:#eee" dir="auto">${esc(a.title||"")}</span>`:""}</div></div>`;
+  return `<div class="item" data-an="${esc(a.id)}" style="border-inline-start-color:${a.type==="3C"?"#47BFD9":"#F55B41"}"><div class="top"><span>${esc(a.date||"")}</span><span><b>${a.type}</b>${a.example?" · مثال":""}${a.status==="draft"?" · مسودة":""}</span></div><div class="ti" dir="auto">${esc((!isEN()&&a.title_ar)||a.title||a.title_ar||"")}</div><div><span class="chip">${esc(a.machine||"")}</span>${a.title_ar&&!isEN()?`<span class="chip" style="background:#eee" dir="auto">${esc(a.title||"")}</span>`:""}</div></div>`;
 }
 function renderAn(){
   const mine=ANS().slice().sort((x,y)=>String(y.updated).localeCompare(String(x.updated)));

@@ -47,7 +47,7 @@ textarea{min-height:96px;resize:vertical}#txt{margin-top:10px}
 .bar{display:grid;grid-template-columns:120px 1fr 38px;gap:8px;align-items:center;font-size:13px;margin:7px 0}
 .bar .t{height:12px;background:var(--alt);border-radius:6px;overflow:hidden}.bar .t i{display:block;height:100%;background:var(--blue);border-radius:6px}
 .bar .n{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.bar .v{text-align:left;color:var(--muted)}
-.item{background:#fff;border:1px solid var(--line);border-right:5px solid var(--coral);border-radius:12px;padding:11px 12px;margin-bottom:9px}
+.item{background:#fff;border:1px solid var(--line);border-inline-start:5px solid var(--coral);border-radius:12px;padding:11px 12px;margin-bottom:9px}
 .item .top{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted)}
 .item .ti{font-weight:700;color:var(--navy);margin:4px 0}
 .chips{display:flex;flex-wrap:wrap;gap:8px}.chips button{border:1px solid #c5cbe0;background:#fff;color:var(--navy);border-radius:20px;padding:8px 12px;font-size:14px;font-weight:700}.chips button.on{background:var(--coral);border-color:var(--coral);color:#fff}
@@ -123,7 +123,8 @@ nav{grid-template-columns:repeat(5,1fr)}
 </head>
 <body>
 <header>
-  <h1>شغلي<small id="who">My Work Log</small></h1>
+  <h1>شغلي<small id="who">Servier Egypt</small></h1>
+  <button id="langBtn" data-lang-toggle type="button" class="noTr" aria-label="Language" style="background:transparent;border:1px solid rgba(255,255,255,.6);color:#fff;border-radius:8px;padding:4px 10px;font-weight:700;font-size:13px;cursor:pointer">EN</button>
   <img src="logo-white.png" alt="Servier" style="height:24px;width:auto">
 </header>
 
@@ -190,6 +191,7 @@ nav{grid-template-columns:repeat(5,1fr)}
 
 <!-- ============ SETTINGS ============ -->
 <section class="tab" id="t-set">
+  <div class="card"><h3>اللغة</h3><button class="btn ghost block noTr" id="langBtn2" data-lang-toggle type="button">English / عربي</button></div>
   <div class="card"><h3>بياناتي</h3>
     <label>الاسم</label><input id="sName"><label>الوظيفة</label><select id="sRole"><option>Engineer</option><option>Technician</option><option>Supervisor</option></select>
     <button class="btn ghost block" id="saveProfile" style="margin-top:10px">حفظ البيانات</button></div>
@@ -236,7 +238,7 @@ nav{grid-template-columns:repeat(5,1fr)}
 <div id="anScroll"><div id="anSheet"></div></div></div></div>
 <div class="gate" id="gate"><div class="box">
   <img src="logo.png" alt="Servier" style="height:34px;width:auto;display:block;margin-bottom:10px">
-  <h2>أهلاً بيك</h2><div class="muted" style="margin-bottom:8px">سجّل شغلك بصوتك. كل حاجة محفوظة على موبايلك إنت بس.</div>
+  <button type="button" data-lang-toggle class="noTr" style="float:inline-end;background:#fff;border:1px solid var(--line);border-radius:8px;padding:3px 10px;font-weight:700;color:var(--navy);cursor:pointer">EN / عربي</button><h2>أهلاً بيك</h2><div class="muted" style="margin-bottom:8px">سجّل شغلك بصوتك. كل حاجة محفوظة على موبايلك إنت بس.</div>
   <label>اسمك</label><input id="gName" dir="auto" placeholder="الاسم"><label>الوظيفة</label>
   <select id="gRole"><option>Engineer</option><option selected>Technician</option><option>Supervisor</option></select>
   <button class="btn main block" id="gGo" style="margin-top:14px">ابدأ</button>
@@ -402,14 +404,14 @@ function parseText(raw){
 let editId=null,usedMic=false,draftText="",pendingCat=null;
 const QUICK=[["Achievement","أتشيفمنت"],["Changeover","تشينج أوفر"],["Warehouse Issue","صرف من المخزن"],["Spare Parts Needed","محتاج قطع غيار"],["Spare Parts Used","استخدمت قطع غيار"],["Breakdown Fixed","عطل"]];
 function renderChips(){
-  $("#chips").innerHTML=QUICK.map(q=>`<button data-c="${q[0]}" class="${pendingCat===q[0]?"on":""}">${q[1]}</button>`).join("");
+  $("#chips").innerHTML=QUICK.map(q=>`<button data-c="${q[0]}" class="${pendingCat===q[0]?"on":""}">${isEN()?q[0]:q[1]}</button>`).join("");
   $$("#chips button").forEach(b=>b.onclick=()=>{pendingCat=pendingCat===b.dataset.c?null:b.dataset.c;renderChips();$("#pickState").textContent=pendingCat?"النوع المختار: "+catAr(pendingCat)+". هيتطبق على اللي هتسجله":""});
 }
 function fillSelects(){
   const mSel=$("#fMachine"),cur=mSel.value;
   mSel.innerHTML='<option value="">اختار الماكينة</option>'+machines().map(m=>`<option>${esc(m.name)}</option>`).join("");if(cur)mSel.value=cur;
-  $("#fCat").innerHTML=CATS.map(c=>`<option value="${c[0]}">${c[1]} (${c[0]})</option>`).join("");
-  $("#logCat").innerHTML='<option value="">كل الأنواع</option>'+CATS.map(c=>`<option value="${c[0]}">${c[1]}</option>`).join("");
+  $("#fCat").innerHTML=CATS.map(c=>`<option value="${c[0]}">${isEN()?c[0]:c[1]+" ("+c[0]+")"}</option>`).join("");
+  $("#logCat").innerHTML='<option value="">كل الأنواع</option>'+CATS.map(c=>`<option value="${c[0]}">${isEN()?c[0]:c[1]}</option>`).join("");
 }
 function showForm(o,note,title){
   $("#formCard").style.display="block";$("#formTitle").textContent=title||"راجع وسجّل";showSuggest([]);
@@ -536,7 +538,7 @@ const EXAMPLES=[
 function renderGloss(){
   const b=$("#glossBody"),btn=(t,ins)=>`<button type="button" class="gl" data-i="${esc(ins)}">${esc(t)}</button>`;
   b.innerHTML='<div class="muted" style="margin-bottom:6px">جمل جاهزة تقلدها:</div><div class="chips">'+EXAMPLES.map(e=>btn(e[0],e[1])).join("")+'</div>'
-   +'<div class="muted" style="margin:12px 0 6px">كلمات بتحدد نوع الشغل:</div>'+CATS.map(c=>`<div style="margin:4px 0;font-size:13px"><b style="color:var(--navy)">${esc(c[1])}</b> <bdi class="muted">${esc(c[2].slice(0,6).join("، "))}</bdi></div>`).join("")
+   +'<div class="muted" style="margin:12px 0 6px">كلمات بتحدد نوع الشغل:</div>'+CATS.map(c=>`<div style="margin:4px 0;font-size:13px"><b style="color:var(--navy)">${esc(isEN()?c[0]:c[1])}</b> <bdi class="muted">${esc(c[2].slice(0,6).join("، "))}</bdi></div>`).join("")
    +'<div class="muted" style="margin:12px 0 6px">أسماء الماكينات اللي بيفهمها:</div>'+machines().map(m=>`<div style="margin:3px 0;font-size:13px"><b>${esc(m.name)}</b> <bdi class="muted">${esc(m.aliases.slice(0,4).join("، "))}</bdi></div>`).join("")
    +'<div class="muted" style="margin-top:12px;line-height:1.7">نصايح: قول رقم الماكينة أو الخط (فيته 3، M92 خط 5). قول المبلغ والساعات (وفرت 5000 جنيه، واقفة ساعتين). تقدر تقول "امبارح" أو التاريخ 12/11. لو الماكينة ما اتعرفتش هيقترح لك أقرب أسماء.</div>';
   $$("#glossBody .gl").forEach(x=>x.onclick=()=>{const t=$("#txt");t.value=(t.value.trim()?t.value.trim()+" ":"")+x.dataset.i;t.focus()});
@@ -545,7 +547,8 @@ function renderGloss(){
 /* ---------------- views ---------------- */
 function switchTab(t){$$(".tab").forEach(s=>s.classList.toggle("on",s.id==="t-"+t));$$("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));window.scrollTo(0,0);if(t==="sum")renderSummary();if(t==="log")renderLog();if(t==="set")renderSettings();if(t==="an"&&window.renderAnalyses)renderAnalyses()}
 $$("#nav button").forEach(b=>b.onclick=()=>switchTab(b.dataset.t));
-const catAr=v=>(CATS.find(c=>c[0]===v)||[,v])[1];
+const isEN=()=>!!(window.I18N&&I18N.isEN()),tr=s=>window.I18N?I18N.tr(s):s;
+const catAr=v=>{const c=CATS.find(c=>c[0]===v);return c?(isEN()?c[0]:c[1]):v};
 const fmt=n=>Math.round(+n||0).toLocaleString("en-US");
 function monthsOf(){const s=new Set(S.entries.map(e=>e.date.slice(0,7)));return [...s].sort().reverse()}
 function renderLog(){
@@ -563,7 +566,7 @@ function openDetail(id){const e=S.entries.find(x=>x.id===id);if(!e)return;openId
 $("#dClose").onclick=()=>$("#detail").classList.remove("show");
 $("#dAn").onclick=()=>{$("#detail").classList.remove("show");if(window.anForEntry)anForEntry(openId);else toast("ملف التحليل مش متحمّل")};
 $("#dEdit").onclick=()=>{const e=S.entries.find(x=>x.id===openId);if(!e)return;$("#detail").classList.remove("show");editId=e.id;draftText=e.text||"";switchTab("add");showForm(e,"","تعديل "+e.id)};
-$("#dDel").onclick=()=>{if(!confirm("تمسح الشغلانة دي؟"))return;S.entries=S.entries.filter(x=>x.id!==openId);save();$("#detail").classList.remove("show");renderAll();toast("اتمسحت")};
+$("#dDel").onclick=()=>{if(!confirm(tr("تمسح الشغلانة دي؟")))return;S.entries=S.entries.filter(x=>x.id!==openId);save();$("#detail").classList.remove("show");renderAll();toast("اتمسحت")};
 ["#q","#logMonth","#logCat"].forEach(s=>$(s).oninput=renderLog);
 
 function periodEntries(){
@@ -586,7 +589,7 @@ function renderSettings(){
   $("#mList").innerHTML=(S.machines||[]).map((m,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;margin:4px 0"><span dir="auto">${esc(m.name)}</span><button type="button" class="btn red" data-del="${i}" style="padding:4px 10px;font-size:13px">مسح</button></div>`).join("");
   $$("#mList [data-del]").forEach(b=>b.onclick=()=>{S.machines.splice(+b.dataset.del,1);save();renderAll()});
 }
-function renderAll(){$("#who").textContent=S.profile?S.profile.name:"My Work Log";fillSelects();renderLog();renderSummary();renderSettings();renderGloss();hints();if(window.renderAnalyses)renderAnalyses()}
+function renderAll(){$("#who").textContent=S.profile?S.profile.name:"Servier Egypt";fillSelects();renderLog();renderSummary();renderSettings();renderGloss();hints();if(window.renderAnalyses)renderAnalyses()}
 $("#retryBtn").onclick=()=>{if(lastBlob)transcribeLast()};
 $("#aiSave").onclick=()=>{const k=$("#aiKey").value.trim(),on=$("#aiOn").checked;if(on&&!/^sk-[\w-]{16,}$/.test(k))return toast("المفتاح شكله غلط. لازم يبدأ بـ sk-");AI.set({on,key:k});toast(on?"اتفعّل الوضع الأونلاين":"اتقفل الوضع الأونلاين")};
 (function(){const c=AI.cfg;$("#aiOn").checked=!!c.on;$("#aiKey").value=c.key||""})();
@@ -672,7 +675,7 @@ $("#saveProfile").onclick=()=>{const n=$("#sName").value.trim();if(!n)return toa
 $("#mAdd").onclick=()=>{const n=$("#mName").value.trim();if(!n)return toast("اكتب اسم الماكينة");
   S.machines=S.machines||[];S.machines.push({name:n,building:$("#mBld").value,area:"",aliases:$("#mAl").value.split(/[,،]/).map(x=>x.trim()).filter(Boolean).concat([n])});
   save();$("#mName").value="";$("#mAl").value="";renderAll();toast("اتضافت")};
-$("#wipe").onclick=()=>{if(!confirm("هتمسح كل شغلك من الموبايل. بعت الملف قبل كده؟"))return;if(!confirm("متأكد؟ مفيش رجعة."))return;try{localStorage.removeItem(K);localStorage.removeItem(AIK)}catch(e){}S={profile:S.profile,entries:[],machines:[],analyses:[],lastExport:null};save();renderAll();toast("اتمسح")};
+$("#wipe").onclick=()=>{if(!confirm(tr("هتمسح كل شغلك من الموبايل. بعت الملف قبل كده؟")))return;if(!confirm(tr("متأكد؟ مفيش رجعة.")))return;try{localStorage.removeItem(K);localStorage.removeItem(AIK)}catch(e){}S={profile:S.profile,entries:[],machines:[],analyses:[],lastExport:null};save();renderAll();toast("اتمسح")};
 
 /* ---------------- report ---------------- */
 $("#reportBtn").onclick=()=>{
@@ -696,5 +699,6 @@ if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.s
 </script>
 <script src="examples.js"></script>
 <script src="analysis.js"></script>
+<script src="i18n.js"></script>
 </body>
 </html>
