@@ -184,6 +184,10 @@ function exportXlsx(){
   shareBlob(blob,"Suggestions_"+today()+".xlsx",T3("اقتراحاتي","My suggestions","Mes idées"));
 }
 
+/* Rows for the one Master sheet (index.html buildXlsx). Anonymous suggestions carry no name or role. */
+window.sgMasterRows=function(){return SG().map(s=>{const anon=String((s.a.anon||{}).v||"")==="anonymous";const sv=num((s.a.saving||{}).v);const idea=label(s,"idea");const now=label(s,"now"),ben=label(s,"benefit");
+  return {id:s.id,date:s.date,anon:anon,building:label(s,"area"),area:"",machine:"",category:"Suggestion box",title:title(s),desc:[idea,now?"Today: "+now:"",ben?"Benefit: "+ben:""].filter(Boolean).join(" | "),impact:ben,dt:"",sav:sv==null?"":sv,evidence:"",status:stat(s.status).en,source:"Suggestion box",text:s.voice||"",loggedAt:s.updated||""}})};
+
 /* ---------- wiring ---------- */
 load();
 $("#sgClose").onclick=()=>{if(window.COACH)COACH.stopMic();const old=CUR&&SG().find(x=>x.id===CUR.id);if(old&&JSON.stringify({a:old.a,v:old.voice})!==JSON.stringify({a:CUR.a,v:CUR.voice})&&confirm(T3("تحفظ التعديلات؟","Save your changes?","Enregistrer les modifications ?"))){commit(CUR.status||"draft");return}if(CUR&&(CUR.voice||Object.keys(CUR.a).length)&&!old&&confirm(T3("تحفظه كمسودة؟","Save it as a draft?","L'enregistrer en brouillon ?"))){commit("draft");return}$("#sgModal").classList.remove("show")};
