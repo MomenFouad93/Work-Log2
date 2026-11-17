@@ -119,6 +119,35 @@ nav{grid-template-columns:repeat(5,1fr)}
 #report th{background:var(--navy);color:#fff;padding:6px;text-align:start}
 #report td{padding:6px;border-bottom:1px solid var(--line);vertical-align:top}
 #report tr:nth-child(even) td{background:var(--alt)}
+/* coach: interview + review */
+.qprog{font-size:13px;color:var(--muted);margin:10px 0 6px}.qprog b{color:var(--coral)}
+.qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;margin:8px 0}.qcard.done{border-color:#91C361;box-shadow:inset 3px 0 0 #91C361}
+.qh{font-weight:700;color:var(--navy);font-size:14px;margin-bottom:6px}.qh small{font-weight:400;color:var(--muted)}.qhint{font-size:12px;color:var(--muted);margin:-2px 0 6px}
+.qcard .chips button{font-size:13px;padding:7px 11px;font-weight:600;text-align:start}
+.nrow{display:flex;align-items:center;gap:8px}.nrow input{max-width:140px}.nrow .unit{color:var(--muted);font-weight:700}.chips.qk{margin-top:6px}.chips.qk button{min-width:44px}
+.mf{position:relative}.mf>textarea,.mf>input{padding-left:44px;padding-right:44px}.mf>input+.micb{top:50%;transform:translateY(-50%);width:30px;height:30px}.idea .mf{flex:1;min-width:0}.oth{margin-top:8px}.oth input{font-size:14px}
+.micb{position:absolute;inset-inline-end:6px;top:6px;width:34px;height:34px;border-radius:50%;border:1px solid #c5cbe0;background:#fff;color:var(--navy);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.micb.rec{background:var(--coral);border-color:var(--coral);color:#fff;animation:pulse 1.2s infinite}.micb.busy{opacity:.5}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(245,91,65,.5)}70%{box-shadow:0 0 0 8px rgba(245,91,65,0)}100%{box-shadow:0 0 0 0 rgba(245,91,65,0)}}
+.cbox{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;margin:10px 0}.ch{font-weight:800;color:var(--navy);font-size:15px;margin-bottom:4px}.ch small{font-weight:400;color:var(--muted);font-size:12px}.ch2{font-weight:700;color:var(--navy);margin:10px 0 4px}
+.rule{border:1px solid var(--line);border-inline-start:4px solid #999;border-radius:8px;padding:8px;margin:6px 0;font-size:13px;background:#FCFCFE}.rule .rfix{color:var(--navy);margin-top:4px;font-weight:600}.rule .btn{margin-top:6px;padding:7px 12px;font-size:13px}
+.cz{border:1px solid var(--line);border-radius:8px;padding:8px;margin:6px 0;font-size:13px}.cz.ok{border-color:#91C361;background:#F5FAEE}.cz.no{opacity:.55}.czc{color:var(--muted);font-size:12px;margin:3px 0 5px}.czs button{font-size:12px!important;padding:5px 10px!important}
+.lnk{background:none;border:0;color:var(--blue);text-decoration:underline;font-size:13px;padding:4px 0;cursor:pointer}
+.addc{display:grid;grid-template-columns:1fr auto;gap:6px;margin-top:8px;align-items:start}.addc>.mf{grid-column:1/-1}.addc select{width:100%!important}.addc select{width:auto;padding:8px}.addc .btn{padding:9px 12px;font-size:14px}
+.chain{margin:4px 0;padding-inline-start:20px;font-size:13px}.chain li{margin:3px 0}.chain li.root{font-weight:700;color:var(--coral)}
+.sub2{font-weight:700;font-size:13px;color:var(--navy);margin:8px 0 2px}.ck{display:flex;gap:8px;align-items:flex-start;font-weight:400;font-size:13px;color:var(--ink);margin:6px 0}.ck input{width:20px;height:20px;flex:none;margin-top:1px}.ck small{color:var(--muted)}
+.evb{margin-top:6px;padding:6px;border-radius:8px;background:#F5FAEE}.evb.need{background:#FFF4C2}.evb .muted{font-size:12px}
+.aires{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px;font-size:13px}
+.guide{margin:6px 0 10px;font-size:13px}.guide summary{font-weight:700;color:var(--blue);cursor:pointer}.guide .gt{margin:6px 0;padding:6px 8px;background:var(--alt);border-radius:8px}
+.tri{margin-top:6px}
+/* Kaizen sheet */
+.kz .kzt{display:flex;align-items:center;gap:14px;background:#242269;color:#fff;padding:8px 12px;border-top:4px solid #F55B41}.kz .kzt b{font-size:22px;letter-spacing:1px}.kz .kzt span{flex:1;font-size:11px}.kz .kzt img{height:30px;background:#fff;padding:3px 6px;border-radius:4px}
+.kz .kzh{width:100%;border-collapse:collapse;table-layout:fixed;margin:6px 0}.kz .kzh th{background:#D3DEF2;color:#242269;font-size:10px;text-align:left;padding:3px 5px;border:1px solid #b9c6e4;width:9%}.kz .kzh td{border:1px solid #b9c6e4;padding:3px 5px;font-size:10.5px}
+.kz .kzc{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 6px 6px}.kz .kb{border:1px solid #b9c6e4;margin-bottom:8px}.kz .kbh{background:#242269;color:#fff;font-weight:700;padding:3px 6px;font-size:11.5px}.kz .kbh span{background:#F55B41;padding:0 7px;margin-inline-end:8px}
+.kz .kbv{padding:5px 7px;min-height:52px;white-space:normal}.kz .tall .kbv{min-height:110px}.kz .kbv.sm{min-height:30px;font-size:10.5px}
+.kz .kzw,.kz .kzr{width:100%;border-collapse:collapse}.kz .kzw th{background:#D3DEF2;color:#242269;width:70px;font-size:10px;text-align:left;padding:3px 5px;border-bottom:1px solid #fff}.kz .kzw th.rc{color:#F55B41}.kz .kzw td{padding:3px 5px;border-bottom:1px solid #e3e8f3;font-size:10.5px}
+.kz .kzr th{background:#91C361;color:#fff;font-size:10px;padding:3px 5px}.kz .kzr td{border:1px solid #e3e8f3;padding:3px 5px;text-align:center;font-size:10.5px}.kz .kzr td:first-child{text-align:left}
+.kz .kzs{display:grid;grid-template-columns:200px 1fr;gap:8px;padding:6px;font-size:11px}
 </style>
 </head>
 <body>
@@ -301,8 +330,8 @@ const BUILTIN=[
 const HEAD=["Entry ID","Date","Member","Role","Building","Area / Line","Machine","Category","Title","What was done","Impact / Result","Downtime Saved (h)","Savings (EGP)","Evidence (WO / photo / link)","Status","Verified","Verified By","Source","Original Text (voice transcript)","Logged At"];
 
 /* ---------------- storage ---------------- */
-let S=load();
 const cleanMachines=a=>(Array.isArray(a)?a:[]).filter(m=>m&&typeof m.name==="string"&&m.name.trim()).map(m=>({name:m.name,building:String(m.building||""),area:String(m.area||""),aliases:(Array.isArray(m.aliases)?m.aliases:[m.name]).map(String)}));
+let S=load();
 function load(){try{const r=JSON.parse(localStorage.getItem(K));if(r&&Array.isArray(r.entries)){r.machines=cleanMachines(r.machines);return Object.assign({profile:null,lastExport:null},r)}}catch(e){}return{profile:null,entries:[],machines:[],lastExport:null}}
 function save(){try{localStorage.setItem(K,JSON.stringify(S));return true}catch(e){toast("مش قادر أحفظ على الموبايل. اعمل نسخة احتياطية");return false}}
 const machines=()=>BUILTIN.concat(S.machines||[]);
@@ -698,6 +727,8 @@ if(!S.profile)$("#gate").classList.add("show");
 if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
 <script src="examples.js"></script>
+<script src="kb.js"></script>
+<script src="coach.js"></script>
 <script src="analysis.js"></script>
 <script src="i18n.js"></script>
 </body>
