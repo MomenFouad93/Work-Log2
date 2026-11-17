@@ -148,11 +148,16 @@ nav{grid-template-columns:repeat(5,1fr)}
 .kz .kzw,.kz .kzr{width:100%;border-collapse:collapse}.kz .kzw th{background:#D3DEF2;color:#242269;width:70px;font-size:10px;text-align:left;padding:3px 5px;border-bottom:1px solid #fff}.kz .kzw th.rc{color:#F55B41}.kz .kzw td{padding:3px 5px;border-bottom:1px solid #e3e8f3;font-size:10.5px}
 .kz .kzr th{background:#91C361;color:#fff;font-size:10px;padding:3px 5px}.kz .kzr td{border:1px solid #e3e8f3;padding:3px 5px;text-align:center;font-size:10.5px}.kz .kzr td:first-child{text-align:left}
 .kz .kzs{display:grid;grid-template-columns:200px 1fr;gap:8px;padding:6px;font-size:11px}
+.sgbody{flex:1;overflow:auto;padding:12px 14px calc(20px + env(safe-area-inset-bottom));background:var(--bg,#F4F5FA)}
+.sgchip{background:#FFF4C2!important;border-color:#FDC300!important;color:#5a4500!important;font-weight:800}
+.chips.seg{display:grid;grid-template-columns:1fr 1fr;margin:0 0 10px}.chips.seg button{text-align:center;justify-content:center}
+dl.kv{grid-template-columns:110px 1fr}
+.item .ti,dl dd,#sgVTitle,.mhead b,.qcard,.cz,.rule,.gt{overflow-wrap:anywhere;word-break:break-word}
 </style>
 </head>
 <body>
 <header>
-  <h1>شغلي<small id="who">Servier Egypt</small></h1>
+  <h1>شغلي<small id="who" class="noTr">Servier Egypt</small></h1>
   <button id="langBtn" data-lang-toggle type="button" class="noTr" aria-label="Language" style="background:transparent;border:1px solid rgba(255,255,255,.6);color:#fff;border-radius:8px;padding:4px 10px;font-weight:700;font-size:13px;cursor:pointer">EN</button>
   <img src="logo-white.png" alt="Servier" style="height:24px;width:auto">
 </header>
@@ -161,7 +166,7 @@ nav{grid-template-columns:repeat(5,1fr)}
 <!-- ============ ADD ============ -->
 <section class="tab on" id="t-add">
   <div class="hint" id="installHint" style="display:none">مهم: اضغط زر المشاركة في Safari ثم <b>Add to Home Screen</b> وافتح التطبيق من الأيقونة <b>قبل ما تسجل أي حاجة</b>. اللي بيتسجل في Safari بيبقى منفصل عن اللي في الأيقونة، وSafari بيمسحه لو ما فتحتش الصفحة أسبوع.</div>
-  <div class="hint" id="backupHint" style="display:none">مفيش نسخة احتياطية من شغلك من فترة. روح <b>إعدادات</b> واضغط <b>ابعت ملف الإكسل</b>.</div>
+  <div class="hint" id="backupHint" style="display:none">مفيش نسخة احتياطية من شغلك من فترة. روح <b>إعدادات</b> واضغط <b>ابعت ملف Excel</b>.</div>
   <div class="card">
     <h3>اختار النوع الأول (اختياري)</h3>
     <div class="chips" id="chips"></div>
@@ -171,8 +176,8 @@ nav{grid-template-columns:repeat(5,1fr)}
     <h3>احكي اللي عملته</h3>
     <button class="mic" id="micBtn" aria-label="تسجيل صوتي"><svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V22h2v-3.08A7 7 0 0 0 19 12z"/></svg></button>
     <button class="btn ghost block" id="retryBtn" style="display:none;margin:6px 0">أعد المحاولة بنفس التسجيل</button><div class="center muted" id="micState">اضغط وتكلم، أو اكتب تحت</div><div class="muted" style="font-size:12px;margin-top:4px">اتكلم براحتك وكمّل، الميكروفون مش هيفصل. لما تضغط تاني بيرتّب الخانات لوحده. قول الإنجليزي زي ما هو.</div>
-    <div class="row2" style="margin-top:8px"><div><label>لغة الكلام</label><select id="lang"><option value="ar-EG">عربي (مصر)</option><option value="en-US">English</option></select></div><div style="display:flex;align-items:end"><button class="btn ghost block" id="manualBtn">أكتب بالإيد</button></div></div>
-    <textarea id="txt" dir="auto" placeholder="مثال: امبارح صلحت عطل الهيتر في ماكينة M92 خط 3 وكانت واقفة ساعتين، وفرت 5000 جنيه"></textarea>
+    <div class="row2" style="margin-top:8px"><div><label>لغة الكلام</label><select id="lang"><option value="ar-EG">عربي (مصر)</option><option value="en-US">English</option><option value="fr-FR">Français</option></select></div><div style="display:flex;align-items:end"><button class="btn ghost block" id="manualBtn">اكتب بإيدك</button></div></div>
+    <textarea id="txt" dir="auto" placeholder="مثال: امبارح صلحت عطل السخان في ماكينة M92 خط 3 وكانت واقفة ساعتين، وفرت 5000 جنيه"></textarea>
     <button class="btn navy block" id="analyzeBtn" style="margin-top:8px">رتّب الكلام في الخانات</button>
   </div>
   <details class="card" id="gloss"><summary style="font-weight:700;color:var(--navy);cursor:pointer">مرجع الكلام: إزاي أقول؟ (اضغط على أي جملة تتحط في الخانة)</summary>
@@ -181,7 +186,7 @@ nav{grid-template-columns:repeat(5,1fr)}
   <div class="card" id="formCard" style="display:none">
     <h3 id="formTitle">راجع وسجّل</h3>
     <div class="muted" id="parseNote"></div>
-    <div class="row2"><div><label>التاريخ</label><input type="date" id="fDate"></div><div><label>الحالة</label><select id="fStatus"><option value="Done">تم (Done)</option><option value="Ongoing">شغال (Ongoing)</option><option value="Planned">مخطط (Planned)</option></select></div></div>
+    <div class="row2"><div><label>التاريخ</label><input type="date" id="fDate"></div><div><label>الحالة</label><select id="fStatus"><option value="Done">تم (Done)</option><option value="Ongoing">جاري (Ongoing)</option><option value="Planned">مخطط (Planned)</option></select></div></div>
     <label>الماكينة</label><select id="fMachine"></select><div class="chips" id="mSug" style="margin-top:6px"></div>
     <label>نوع الشغل</label><select id="fCat"></select>
     <label>قطع الغيار (اسم / كود / كمية)</label><input id="fParts" dir="auto">
@@ -189,20 +194,22 @@ nav{grid-template-columns:repeat(5,1fr)}
     <label>اللي اتعمل</label><textarea id="fDesc" dir="auto"></textarea>
     <label>النتيجة / الأثر</label><input id="fImpact" dir="auto" placeholder="مثال: الخط رجع للسرعة العادية">
     <div class="row2"><div><label>ساعات توقف اتوفرت</label><input type="number" inputmode="decimal" min="0" step="0.5" id="fDt"></div><div><label>التوفير (جنيه)</label><input type="number" inputmode="numeric" min="0" id="fSav"></div></div>
-    <label>دليل (رقم WO / لينك / وصف صورة)</label><input id="fEv" dir="auto">
+    <label>الدليل (رقم WO / رابط / وصف صورة)</label><input id="fEv" dir="auto">
     <div class="row2" style="margin-top:14px"><button class="btn main" id="saveBtn">حفظ</button><button class="btn ghost" id="cancelBtn">إلغاء</button></div>
   </div>
 </section>
 
 <!-- ============ LOG ============ -->
 <section class="tab" id="t-log">
-  <div class="card"><input id="q" placeholder="بحث: ماكينة، عنوان، كلمة..." dir="auto"><div class="row2" style="margin-top:8px"><select id="logMonth"></select><select id="logCat"></select></div></div>
-  <div id="list"></div>
+  <div class="chips seg"><button type="button" data-lv="log" class="on">سجلي</button><button type="button" data-lv="sg">اقتراحاتي<span id="sgCount"></span></button></div>
+  <div id="sgList" style="display:none"></div>
+  <div id="logView"><div class="card"><input id="q" placeholder="بحث: ماكينة، عنوان، كلمة..." dir="auto"><div class="row2" style="margin-top:8px"><select id="logMonth"></select><select id="logCat"></select></div></div>
+  <div id="list"></div></div>
 </section>
 
 <!-- ============ ANALYSIS ============ -->
 <section class="tab" id="t-an">
-  <div class="card"><h3>تحليل المشاكل: A3 و 3C</h3><div class="muted" style="line-height:1.7">3C للمشاكل الصغيرة (كارت واحد). A3 للمشاكل الكبيرة أو المتكررة. التطبيق بيسألك أسئلة حسب نوع العطل ويرتّب الإجابات في نفس شيت Servier، وتقدر تصدّره إكسل على القالب الأصلي.</div>
+  <div class="card"><h3>تحليل المشاكل: A3 و 3C</h3><div class="muted" style="line-height:1.7">3C للمشاكل الصغيرة (بطاقة واحدة). A3 للمشاكل الكبيرة أو المتكررة. التطبيق بيسألك أسئلة حسب نوع العطل ويرتّب الإجابات في نفس نموذج Servier، وتقدر تصدّره Excel على القالب الأصلي.</div>
   <button class="btn main block" id="anNew" style="margin-top:10px">تحليل جديد</button></div>
   <h3 style="color:var(--navy);margin:14px 2px 8px">تحليلاتي</h3><div id="anMine"></div>
   <h3 style="color:var(--navy);margin:14px 2px 4px">أمثلة جاهزة للتعلم</h3><div class="muted" style="margin:0 2px 8px">افتح أي مثال تشوف المشكلة والتحليل والحل. وتقدر تنسخه وتعدّل عليه.</div><div id="anEx"></div>
@@ -215,33 +222,33 @@ nav{grid-template-columns:repeat(5,1fr)}
   <div class="card"><h3>حسب النوع</h3><div id="byCat"></div></div>
   <div class="card"><h3>حسب الماكينة</h3><div id="byMach"></div></div>
   <button class="btn navy block" id="reportBtn">تقرير للطباعة / PDF</button>
-  <a class="btn ghost block" id="viewerBtn" href="viewer.html#mine" style="display:block;text-align:center;text-decoration:none;margin-top:10px">رسومات وبرزنتيشن لشغلي</a>
+  <a class="btn ghost block" id="viewerBtn" href="viewer.html#mine" style="display:block;text-align:center;text-decoration:none;margin-top:10px">رسوم بيانية وعرض تقديمي لشغلي</a>
 </section>
 
 <!-- ============ SETTINGS ============ -->
 <section class="tab" id="t-set">
-  <div class="card"><h3>اللغة</h3><button class="btn ghost block noTr" id="langBtn2" data-lang-toggle type="button">English / عربي</button></div>
+  <div class="card"><h3>اللغة</h3><div class="chips noTr"><button type="button" data-lang-set="ar">عربي</button><button type="button" data-lang-set="en">English</button><button type="button" data-lang-set="fr">Français</button></div></div>
   <div class="card"><h3>بياناتي</h3>
-    <label>الاسم</label><input id="sName"><label>الوظيفة</label><select id="sRole"><option>Engineer</option><option>Technician</option><option>Supervisor</option></select>
+    <label>الاسم</label><input id="sName"><label>الوظيفة</label><select id="sRole"><option value="Engineer">مهندس</option><option value="Technician">فني</option><option value="Supervisor">مشرف</option></select>
     <button class="btn ghost block" id="saveProfile" style="margin-top:10px">حفظ البيانات</button></div>
-  <div class="card"><h3>ملف الإكسل بتاعي</h3>
+  <div class="card"><h3>ملف Excel بتاعي</h3>
     <div class="muted" id="exportInfo"></div>
-    <button class="btn main block" id="shareBtn" style="margin-top:8px">ابعت ملف الإكسل</button>
-    <div class="muted" style="margin-top:6px">بيفتح قايمة المشاركة: اختار واتساب أو تليجرام أو الإيميل أو Files. الملف بيتعمل من اللي على موبايلك وقت الضغط.</div></div>
+    <button class="btn main block" id="shareBtn" style="margin-top:8px">ابعت ملف Excel</button>
+    <div class="muted" style="margin-top:6px">بيفتح قايمة المشاركة: اختار واتساب أو تليجرام أو البريد الإلكتروني أو Files. الملف بيتعمل من اللي على موبايلك وقت الضغط.</div></div>
   <div class="card"><h3>نسخة احتياطية</h3>
     <div class="row2"><button class="btn ghost" id="bkBtn">حفظ نسخة</button><button class="btn ghost" id="rsBtn">استرجاع</button></div>
     <input type="file" id="rsFile" accept=".json,application/json" hidden>
     <div class="muted" style="margin-top:6px">استخدمها لو غيرت الموبايل أو مسحت بيانات المتصفح.</div></div>
   <div class="card"><h3>ماكينة جديدة</h3>
-    <label>الاسم</label><input id="mName" dir="auto"><label>المبنى</label><select id="mBld"><option>Acacia</option><option>Palmier</option><option>Utilities</option><option>Site-wide</option></select>
+    <label>الاسم</label><input id="mName" dir="auto"><label>المبنى</label><select id="mBld"><option>Acacia</option><option>Palmier</option><option value="Utilities">المرافق</option><option value="Site-wide">الموقع كله</option></select>
     <label>أسماء بتتقال شفوي (بينهم فاصلة)</label><input id="mAl" dir="auto" placeholder="مثال: فيته 4, fette 4">
     <button class="btn ghost block" id="mAdd" style="margin-top:10px">إضافة</button><div class="muted" id="mList" style="margin-top:8px"></div></div>
   <div class="card"><h3>فهم أدق لما النت يكون شغال (اختياري)</h3>
-    <div class="muted" style="line-height:1.7">لو فعّلته، الصوت والنص بيتبعتوا لخدمة OpenAI (خارج أنظمة Servier) وبيتحولوا لنص وخانات بدقة أعلى بكتير في الكلام المخلوط. اسأل الـIT أو مديرك قبل ما تفعّله على شغل حقيقي. المفتاح بيتحفظ على موبايلك بس، وما بيدخلش النسخة الاحتياطية ولا ملف الإكسل. من غير نت أو من غير تفعيل، التطبيق بيشتغل بالقواعد العادية.</div>
-    <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="aiOn" style="width:auto"> فعّل الوضع الأونلاين</label>
+    <div class="muted" style="line-height:1.7">لو فعّلته، الصوت والنص بيتبعتوا لخدمة OpenAI (خارج أنظمة Servier) وبيتحولوا لنص وخانات بدقة أعلى بكتير في الكلام المخلوط. اسأل الـIT أو مديرك قبل ما تفعّله على شغل حقيقي. المفتاح بيتحفظ على موبايلك بس، وما بيدخلش النسخة الاحتياطية ولا ملف Excel. من غير نت أو من غير تفعيل، التطبيق بيشتغل بالقواعد العادية.</div>
+    <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="aiOn" style="width:auto"> فعّل وضع الإنترنت</label>
     <label>مفتاح OpenAI API</label><input id="aiKey" type="password" autocomplete="off" dir="ltr" placeholder="sk-...">
     <button class="btn ghost block" id="aiSave" style="margin-top:10px">حفظ</button></div>
-  <div class="card"><h3>الخصوصية</h3><div class="muted" style="line-height:1.7">كل اللي بتسجله محفوظ على موبايلك بس. التطبيق مالوش سيرفر ومحدش يقدر يشوف شغلك غير لما إنت تبعت الملف بنفسك. في الوضع العادي الصوت بيتحول لنص عن طريق خدمة موبايلك (Apple أو Google)، فما تقولش أرقام باتشات أو أسماء منتجات أو أي معلومة سرية. ملف الإكسل بيحتوي كمان على نص كلامك الأصلي، فراجعه قبل ما تبعته.</div></div>
+  <div class="card"><h3>الخصوصية</h3><div class="muted" style="line-height:1.7">كل اللي بتسجله محفوظ على موبايلك بس. التطبيق مالوش خادم (server) ومحدش يقدر يشوف شغلك غير لما إنت تبعت الملف بنفسك. في الوضع العادي الصوت بيتحول لنص عن طريق خدمة موبايلك (Apple أو Google)، فما تقولش أرقام تشغيلات أو أسماء منتجات أو أي معلومة سرية. ملف Excel بيحتوي كمان على نص كلامك الأصلي، فراجعه قبل ما تبعته.</div></div>
   <button class="btn red block" id="wipe">مسح كل بياناتي من الموبايل</button>
 </section>
 </main>
@@ -265,11 +272,13 @@ nav{grid-template-columns:repeat(5,1fr)}
 <div class="modal" id="anView"><div class="sheet full"><div class="mhead noprint"><b id="anVTitle"></b><button id="anZout">−</button><button id="anZin">+</button><button id="anVClose">إغلاق</button></div><div id="anVMeta" class="noprint" style="padding:6px 12px 0;font-size:12px"></div>
 <div class="noprint" style="display:flex;flex-wrap:wrap;gap:6px;padding:6px 12px;background:#fff"><button class="btn main" id="anVXlsx" style="padding:8px 12px;font-size:14px">Excel</button><button class="btn navy" id="anVPrint" style="padding:8px 12px;font-size:14px">PDF</button><button class="btn ghost" id="anVEdit" style="padding:8px 12px;font-size:14px">تعديل</button><button class="btn ghost" id="anVCopy" style="padding:8px 12px;font-size:14px;display:none">انسخ وعدّل</button><button class="btn red" id="anVDel" style="padding:8px 12px;font-size:14px">حذف</button></div>
 <div id="anScroll"><div id="anSheet"></div></div></div></div>
+<div class="modal" id="sgModal"><div class="sheet full"><div class="mhead"><b id="sgTitle">صندوق الاقتراحات</b><button id="sgClose">إغلاق</button></div><div id="sgBody" class="sgbody"></div></div></div>
+<div class="modal" id="sgView"><div class="sheet"><div class="mhead" style="border-radius:18px 18px 0 0"><b id="sgVTitle" dir="auto"></b><button id="sgVClose">إغلاق</button></div><div id="sgVBody" style="padding:12px 14px calc(16px + env(safe-area-inset-bottom));max-height:78vh;overflow:auto"></div></div></div>
 <div class="gate" id="gate"><div class="box">
   <img src="logo.png" alt="Servier" style="height:34px;width:auto;display:block;margin-bottom:10px">
-  <button type="button" data-lang-toggle class="noTr" style="float:inline-end;background:#fff;border:1px solid var(--line);border-radius:8px;padding:3px 10px;font-weight:700;color:var(--navy);cursor:pointer">EN / عربي</button><h2>أهلاً بيك</h2><div class="muted" style="margin-bottom:8px">سجّل شغلك بصوتك. كل حاجة محفوظة على موبايلك إنت بس.</div>
+  <button type="button" data-lang-toggle class="noTr" style="float:inline-end;background:#fff;border:1px solid var(--line);border-radius:8px;padding:3px 10px;font-weight:700;color:var(--navy);cursor:pointer">EN / FR / عربي</button><h2>أهلاً بيك</h2><div class="muted" style="margin-bottom:8px">سجّل شغلك بصوتك. كل حاجة محفوظة على موبايلك إنت بس.</div>
   <label>اسمك</label><input id="gName" dir="auto" placeholder="الاسم"><label>الوظيفة</label>
-  <select id="gRole"><option>Engineer</option><option selected>Technician</option><option>Supervisor</option></select>
+  <select id="gRole"><option value="Engineer">مهندس</option><option value="Technician" selected>فني</option><option value="Supervisor">مشرف</option></select>
   <button class="btn main block" id="gGo" style="margin-top:14px">ابدأ</button>
 </div></div>
 
@@ -281,20 +290,20 @@ const K="wl.v1";
 
 /* ---------------- reference data ---------------- */
 const CATS=[
- ["Achievement","أتشيفمنت / إنجاز",["تشيفمنت","تشيفمن","تشيفمانت","اتشيف","اتشيفمنت","اتشفمنت","achievement","achievements","achieve","achieved","accomplished","انجاز","انجازات","حققت","نجحت","نجاح","اتمام","completed"]],
- ["Beyond Scope","شغل زيادة عن مهامي",["زياده عن","خارج شغلي","خارج اختصاصي","مش من شغلي","مش شغلي","مش من مهامي","بعيد عن شغلي","ساعدت","beyond","extra","اضافي","تطوعت","duties","additional task","additional tasks","not my job","outside my"]],
- ["Cost Saving","توفير فلوس",["وفر","توفير","saving","saved","بدل ما نشتري","بدل شراء","بدل ما اشتري","اصلاح محلي","محلي","ارخص","اقل تكلفه","cost saving","cost reduction","خفضت التكلفه"]],
- ["Kaizen / Improvement","تحسين",["تحسين","حسنت","كايزن","كيزن","كايزين","طورت","تطوير","kaizen","improve","improvement","سهلت","قللت","خفضت","optimiz","ايمبروفمنت"]],
- ["Breakdown Fixed","إصلاح عطل",["عطل","اتعطل","معطل","صلحت","اصلحت","خربان","باظت","بايظ","بوظت","واقفه","وقفت","وقف","breakdown","بريك داون","بريكداون","fault","فولت","فالت","alarm","انذار","fixed","repair","jammed","stuck","trip","تريب","down for","تغيير قطعه","غيرت","استبدلت","مشكله","كسر","اتكسر","احتراق","اتحرق","مش شغال","مش بيشتغل","وقفت الماكينه"]],
- ["Project / Installation","مشروع / تركيب",["تركيب","ركبت","ركبنا","مشروع","بروجكت","اينستاليشن","installation","install","installed","project","نقل ماكينه","relocation","commissioning","هركب","هنركب"]],
- ["Safety","سلامة",["سلامه","امان","سيفتي","safety","حمايه","guard","جارد","interlock","loto","لوتو","lockout","خطر","hazard","near miss","اصابه","حريق","ppe"]],
- ["GMP / Quality","جودة / GMP",["جوده","gmp","جي ام بي","معايره","كاليبريشن","calibration","تاهيل","كواليفيكيشن","qualification","توثيق","deviation","انحراف","validation","فاليديشن","sop","audit","اوديت","تدقيق","capa","change control"]],
- ["Energy & Utilities","طاقة ومرافق",["كهرباء","طاقه","تسريب هواء","تسريب","air leak","energy","مياه","استهلاك","consumption","ترشيد","هواء مضغوط","بخار","kwh"]],
- ["Training & Knowledge","تدريب ومعرفة",["دربت","تدريب","تريننج","شرحت","opl","training","trained","taught","teach","علمت","محاضره","كتبت دليل"]],
- ["Changeover","تشينج أوفر / تغيير منتج",["تشينج اوفر","تشينجوفر","تشنج اوفر","تشانج اوفر","شينج اوفر","شينجوفر","شانج اوفر","تشينج اوير","تشينج اوفير","تغيير منتج","تغيير المنتج","تغير منتج","تغيير الصنف","تغيير صنف","تغيير باتش","تبديل منتج","تغيير فورمات","product change","format change","changeover","change over","change-over","changement","changeovers","c/o"]],
- ["Warehouse Issue","صرف من المخزن",["صرف","صرفت","هصرف","من المخزن","المخزن","مخزن","warehouse","stores issue","withdraw","withdrawn","pulled from"]],
- ["Spare Parts Needed","محتاج قطع غيار",["محتاج","محتاجين","هشتري","اشتري","نشتري","شراء","مطلوب","طلبت","هطلب","طلب شراء","ناقص","need","needed","purchase","buy","waiting for","pr request","order","please order"]],
- ["Spare Parts Used","استخدمت قطع غيار",["استخدمت","استعملت","used","بدلت","ركبت قطعه","ركبت قطع","ركبنا قطع","ركبت سيل","ركبت بيرنج","ركبت موتور","ركبت سير","غيرت قطعه","غيرنا قطع","replaced"]]
+ ["Achievement","إنجاز",["تشيفمنت","تشيفمن","تشيفمانت","اتشيف","اتشيفمنت","اتشفمنت","achievement","achievements","achieve","achieved","accomplished","انجاز","انجازات","حققت","نجحت","نجاح","اتمام","completed","réalisé","réussi","réalisation","terminé"]],
+ ["Beyond Scope","شغل زيادة عن مهامي",["زياده عن","خارج شغلي","خارج اختصاصي","مش من شغلي","مش شغلي","مش من مهامي","بعيد عن شغلي","ساعدت","beyond","extra","اضافي","تطوعت","duties","additional task","additional tasks","not my job","outside my","hors de mon périmètre","pas mon travail","en plus","aidé"]],
+ ["Cost Saving","توفير تكلفة",["وفر","توفير","saving","saved","بدل ما نشتري","بدل شراء","بدل ما اشتري","اصلاح محلي","محلي","ارخص","اقل تكلفه","cost saving","cost reduction","خفضت التكلفه","économie","économisé","économiser","moins cher","réduction des coûts"]],
+ ["Kaizen / Improvement","تحسين",["تحسين","حسنت","كايزن","كيزن","كايزين","طورت","تطوير","kaizen","improve","improvement","سهلت","قللت","خفضت","optimiz","ايمبروفمنت","amélioration","amélioré","optimisé","simplifié"]],
+ ["Breakdown Fixed","إصلاح عطل",["عطل","اتعطل","معطل","صلحت","اصلحت","خربان","باظت","بايظ","بوظت","واقفه","وقفت","وقف","breakdown","بريك داون","بريكداون","fault","فولت","فالت","alarm","انذار","fixed","repair","jammed","stuck","trip","تريب","down for","تغيير قطعه","غيرت","استبدلت","مشكله","كسر","اتكسر","احتراق","اتحرق","مش شغال","مش بيشتغل","وقفت الماكينه","panne","réparé","dépanné","arrêt machine","défaut","alarme","bloqué"]],
+ ["Project / Installation","مشروع / تركيب",["تركيب","ركبت","ركبنا","مشروع","بروجكت","اينستاليشن","installation","install","installed","project","نقل ماكينه","relocation","commissioning","هركب","هنركب","installation","installé","projet","mise en service"]],
+ ["Safety","سلامة",["سلامه","امان","سيفتي","safety","حمايه","guard","جارد","interlock","loto","لوتو","lockout","خطر","hazard","near miss","اصابه","حريق","ppe","sécurité","danger","accident","presque-accident","consignation","protecteur"]],
+ ["GMP / Quality","جودة / GMP",["جوده","gmp","جي ام بي","معايره","كاليبريشن","calibration","تاهيل","كواليفيكيشن","qualification","توثيق","deviation","انحراف","validation","فاليديشن","sop","audit","اوديت","تدقيق","capa","change control","qualité","bpf","déviation","étalonnage","qualification","audit","validation"]],
+ ["Energy & Utilities","طاقة ومرافق",["كهرباء","طاقه","تسريب هواء","تسريب","air leak","energy","مياه","استهلاك","consumption","ترشيد","هواء مضغوط","بخار","kwh","énergie","électricité","eau","fuite d'air","vapeur","consommation"]],
+ ["Training & Knowledge","تدريب ومعرفة",["دربت","تدريب","تريننج","شرحت","opl","training","trained","taught","teach","علمت","محاضره","كتبت دليل","formation","formé","expliqué","opl"]],
+ ["Changeover","تغيير المنتج",["تشينج اوفر","تشينجوفر","تشنج اوفر","تشانج اوفر","شينج اوفر","شينجوفر","شانج اوفر","تشينج اوير","تشينج اوفير","تغيير منتج","تغيير المنتج","تغير منتج","تغيير الصنف","تغيير صنف","تغيير باتش","تبديل منتج","تغيير فورمات","product change","format change","changeover","change over","change-over","changement","changeovers","c/o","changement de format","changement de série","changement de produit"]],
+ ["Warehouse Issue","صرف من المخزن",["صرف","صرفت","هصرف","من المخزن","المخزن","مخزن","warehouse","stores issue","withdraw","withdrawn","pulled from","magasin","sorti du magasin","sortie magasin"]],
+ ["Spare Parts Needed","محتاج قطع غيار",["محتاج","محتاجين","هشتري","اشتري","نشتري","شراء","مطلوب","طلبت","هطلب","طلب شراء","ناقص","need","needed","purchase","buy","waiting for","pr request","order","please order","besoin","commander","acheter","pièce manquante","en attente de pièce"]],
+ ["Spare Parts Used","استخدمت قطع غيار",["استخدمت","استعملت","used","بدلت","ركبت قطعه","ركبت قطع","ركبنا قطع","ركبت سيل","ركبت بيرنج","ركبت موتور","ركبت سير","غيرت قطعه","غيرنا قطع","replaced","remplacé","changé la pièce","utilisé"]]
 ];
 const SPARE=["Spare Parts Needed","Spare Parts Used","Warehouse Issue"];
 const BUILTIN=[
@@ -341,7 +350,7 @@ function fromIso(s){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s||"");return m?new
 function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("show"),2600)}
 
 /* ---------------- parsing (works offline, no AI) ---------------- */
-function norm(s){return String(s||"").toLowerCase().replace(/[\u0660-\u0669]/g,d=>d.charCodeAt(0)-0x660).replace(/[\u06F0-\u06F9]/g,d=>d.charCodeAt(0)-0x6F0).replace(/[\u064B-\u065F\u0670\u0640]/g,"").replace(/[أإآ]/g,"ا").replace(/ى/g,"ي").replace(/ة/g,"ه").replace(/[،؛؟]/g," , ").replace(/\s+/g," ").trim()}
+function norm(s){return String(s||"").toLowerCase().replace(/\bligne\b/g,"line").replace(/[\u0660-\u0669]/g,d=>d.charCodeAt(0)-0x660).replace(/[\u06F0-\u06F9]/g,d=>d.charCodeAt(0)-0x6F0).replace(/[\u064B-\u065F\u0670\u0640]/g,"").replace(/[أإآ]/g,"ا").replace(/ى/g,"ي").replace(/ة/g,"ه").replace(/[،؛؟]/g," , ").replace(/\s+/g," ").trim()}
 function hasTerm(text,term){
   if(!term)return false;
   if(/^[a-z0-9 \/\.\-]+$/.test(term)){const re=new RegExp("(^|[^a-z0-9])"+term.replace(/[.*+?^${}()|[\]\\\/]/g,"\\$&").replace(/ /g,"\\s*")+"($|[^a-z0-9])");return re.test(text)}
@@ -393,8 +402,8 @@ function suggestMachines(nt,max){
 }
 function mult(w){return w&&/^(الف|الاف|k)$/.test(w)?1000:1}
 function parseHours(nt,cat){
-  const stop=/(توقف|وقف|واقف|downtime|down|stopp?ed|stop|وقت|خد|استغرق|took|take)/,loose=cat==="Changeover"||cat==="Breakdown Fixed";
-  const re=/(\d+(?:\.\d+)?)\s*(?:ساعات|ساعه|hours|hour|hrs|hr|h)(?![a-z\u0600-\u06FF])|(ساعتين)|(نص ساعه|نصف ساعه)|(ربع ساعه)|(ساعه)(?![a-z\u0600-\u06FF])|(\d+)\s*(?:دقيقه|دقايق|minutes|minute|mins|min)(?![a-z\u0600-\u06FF])/g;let h;
+  const stop=/(توقف|وقف|واقف|downtime|down|stopp?ed|stop|وقت|خد|استغرق|took|take|arr[eê]t|pendant|dur[eé])/,loose=cat==="Changeover"||cat==="Breakdown Fixed";
+  const re=/(\d+(?:\.\d+)?)\s*(?:ساعات|ساعه|hours|hour|heures|heure|hrs|hr|h)(?![a-z\u0600-\u06FF])|(ساعتين)|(نص ساعه|نصف ساعه)|(ربع ساعه)|(ساعه)(?![a-z\u0600-\u06FF])|(\d+)\s*(?:دقيقه|دقايق|minutes|minute|mins|min)(?![a-z\u0600-\u06FF])/g;let h;
   while((h=re.exec(nt))){
     const around=nt.slice(Math.max(0,h.index-30),h.index+h[0].length+30);if(!loose&&!stop.test(around))continue;
     let v=h[1]?parseFloat(h[1]):h[2]?2:h[3]?0.5:h[4]?0.25:h[5]?1:Math.round(h[6]/60*100)/100;
@@ -412,7 +421,7 @@ function parseText(raw){
   const dm=/(?<![\d.])(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?(?![\d])|(?<![\d.])(\d{1,2})-(\d{1,2})-(\d{2,4})(?![\d])/.exec(nt);
   if(dm){let d=+(dm[1]||dm[4]),mo=+(dm[2]||dm[5]),y=(dm[3]||dm[6])?+(dm[3]||dm[6]):new Date().getFullYear();if(y<100)y+=2000;if(mo>=1&&mo<=12&&d>=1&&d<=31){const dd=new Date(y,mo-1,d);if(dd<=new Date())out.date=iso(dd)}}
   // savings
-  let sv=/(\d+(?:\.\d+)?)\s*(الف|الاف|k)?\s*(?:جنيه|جنيها|جنيهات|egp|le(?![a-z])|l\.e|pounds?)/.exec(nt)||/(?:وفر[\u0600-\u06FF]*|saved|saving|توفير)\s*(?:حوالي|تقريبا|ب|بحوالي)?\s*(\d+(?:\.\d+)?)(?![\d.])(?!\s*(?:ساع|hour|hr|h(?![a-z])|دقيق|min))\s*(الف|الاف|k)?/.exec(nt);
+  let sv=/(\d+(?:\.\d+)?)\s*(الف|الاف|k)?\s*(?:جنيه|جنيها|جنيهات|egp|le(?![a-z])|l\.e|pounds?|livres?)/.exec(nt)||/(?:وفر[\u0600-\u06FF]*|saved|saving|توفير)\s*(?:حوالي|تقريبا|ب|بحوالي)?\s*(\d+(?:\.\d+)?)(?![\d.])(?!\s*(?:ساع|hour|hr|h(?![a-z])|دقيق|min))\s*(الف|الاف|k)?/.exec(nt);
   if(sv)out.sav=Math.round(parseFloat(sv[1])*mult(sv[2]));
   // downtime hours
   out.dt=parseHours(nt,out.category);
@@ -431,16 +440,19 @@ function parseText(raw){
 
 /* ---------------- add / edit form ---------------- */
 let editId=null,usedMic=false,draftText="",pendingCat=null;
-const QUICK=[["Achievement","أتشيفمنت"],["Changeover","تشينج أوفر"],["Warehouse Issue","صرف من المخزن"],["Spare Parts Needed","محتاج قطع غيار"],["Spare Parts Used","استخدمت قطع غيار"],["Breakdown Fixed","عطل"]];
+const QUICK=[["Achievement","إنجاز"],["Changeover","تغيير المنتج"],["Warehouse Issue","صرف من المخزن"],["Spare Parts Needed","محتاج قطع غيار"],["Spare Parts Used","استخدمت قطع غيار"],["Breakdown Fixed","إصلاح عطل"]];
 function renderChips(){
-  $("#chips").innerHTML=QUICK.map(q=>`<button data-c="${q[0]}" class="${pendingCat===q[0]?"on":""}">${isEN()?q[0]:q[1]}</button>`).join("");
-  $$("#chips button").forEach(b=>b.onclick=()=>{pendingCat=pendingCat===b.dataset.c?null:b.dataset.c;renderChips();$("#pickState").textContent=pendingCat?"النوع المختار: "+catAr(pendingCat)+". هيتطبق على اللي هتسجله":""});
+  $("#chips").innerHTML=QUICK.map(q=>`<button data-c="${q[0]}" class="${pendingCat===q[0]?"on":""}">${isEN()?q[0]:q[1]}</button>`).join("")+`<button type="button" class="sgchip" id="sgChip">${window.SG_BULB||""} صندوق الاقتراحات</button>`;
+  const sgc=$("#sgChip");if(sgc)sgc.onclick=e=>{e.stopPropagation();if(window.sgOpen)sgOpen()};
+  $$("#chips button[data-c]").forEach(b=>b.onclick=()=>{pendingCat=pendingCat===b.dataset.c?null:b.dataset.c;renderChips();$("#pickState").textContent=pendingCat?"النوع المختار: "+catAr(pendingCat)+". هيتطبق على اللي هتسجله":""});
 }
 function fillSelects(){
   const mSel=$("#fMachine"),cur=mSel.value;
-  mSel.innerHTML='<option value="">اختار الماكينة</option>'+machines().map(m=>`<option>${esc(m.name)}</option>`).join("");if(cur)mSel.value=cur;
+  mSel.innerHTML='<option value="">اختار الماكينة</option>'+machines().map(m=>`<option class="noTr" value="${esc(m.name)}">${esc(m.name)}</option>`).join("");if(cur)mSel.value=cur;
+  const fc=$("#fCat").value,lc=$("#logCat").value;
   $("#fCat").innerHTML=CATS.map(c=>`<option value="${c[0]}">${isEN()?c[0]:c[1]+" ("+c[0]+")"}</option>`).join("");
   $("#logCat").innerHTML='<option value="">كل الأنواع</option>'+CATS.map(c=>`<option value="${c[0]}">${isEN()?c[0]:c[1]}</option>`).join("");
+  if(fc)$("#fCat").value=fc;if(lc)$("#logCat").value=lc;
 }
 function showForm(o,note,title){
   $("#formCard").style.display="block";$("#formTitle").textContent=title||"راجع وسجّل";showSuggest([]);
@@ -460,12 +472,12 @@ async function analyze(auto){
     if(AI.on&&navigator.onLine){micUI(false,"بفهم كلامك...");try{o=await aiMerge(t,o);how="اتفهم بالذكاء الاصطناعي. "}catch(e){how="الذكاء الاصطناعي مش متاح دلوقتي، اتفهم بالقواعد. "}micUI(false)}
     if(pendingCat){o.category=pendingCat;if(!SPARE.includes(pendingCat))o.parts="";else if(!o.parts)o.parts=t}
     const miss=[];if(!o.machine)miss.push("الماكينة");if(o.unsure&&!pendingCat)miss.push("نوع الشغل (اختاره)");
-    showForm(o,how+"الخانات اتعبت من كلامك. بص عليها وصحح اللي غلط"+(miss.length?". ما لقيتش: "+miss.join("، "):""),"راجع وسجّل");
+    showForm(o,how+"الخانات اتملت من كلامك. بص عليها وصحح اللي غلط"+(miss.length?". ما لقيتش: "+miss.join("، "):""),"راجع وسجّل");
     showSuggest(o.machine?[]:suggestMachines(numWords(norm(t)),4));
   }catch(e){toast("حصلت مشكلة في الترتيب. اكتب الخانات بإيدك")}finally{analyzing=false}
 }
 function showSuggest(list){
-  const el=$("#mSug");el.innerHTML=list.length?'<div class="muted" style="width:100%">يمكن تقصد:</div>'+list.map(n=>`<button type="button" data-m="${esc(n)}">${esc(n)}</button>`).join(""):"";
+  const el=$("#mSug");el.innerHTML=list.length?'<div class="muted" style="width:100%">'+(window.I18N?I18N.tr("يمكن تقصد:"):"يمكن تقصد:")+'</div>'+list.map(n=>`<button type="button" data-m="${esc(n)}">${esc(n)}</button>`).join(""):"";
   $$("#mSug button").forEach(b=>b.onclick=()=>{$("#fMachine").value=b.dataset.m;showSuggest([])});
 }
 function clearDraft(){editId=null;usedMic=false;draftText="";pendingCat=null;renderChips();$("#pickState").textContent="";$("#txt").value="";$("#formCard").style.display="none"}
@@ -526,12 +538,12 @@ async function transcribeLast(){
     try{const t=await whisper(lastBlob);micUI(false);lastBlob=null;
       if(!t){toast("ما سمعتش حاجة واضحة، جرب تاني");return}
       const cur=$("#txt").value.trim();$("#txt").value=(cur?cur+" ":"")+t;usedMic=true;analyze(true)}
-    catch(e){micUI(false);$("#retryBtn").style.display="block";toast(e.message==="key"?"مفتاح الذكاء الاصطناعي غلط. راجع الإعدادات":"التحويل أونلاين فشل. التسجيل لسه محفوظ، اضغط إعادة المحاولة")}
+    catch(e){micUI(false);$("#retryBtn").style.display="block";toast(e.message==="key"?"مفتاح الذكاء الاصطناعي غلط. راجع الإعدادات":"التحويل عبر الإنترنت فشل. التسجيل لسه محفوظ، اضغط إعادة المحاولة")}
 }
 $("#micBtn").onclick=async()=>{
   if(listening){want=false;if(mr&&mr.state==="recording"){mr.stop();return}if(recActive){try{rec.stop()}catch(e){}}else{micUI(false);finishVoice()}return}
   if(AI.on&&navigator.onLine&&navigator.mediaDevices&&window.MediaRecorder){try{await startRecord();return}catch(e){toast("مقدرتش أشغل الميكروفون. بجرب الطريقة العادية")}}
-  if(!SR){toast("المتصفح مش بيدعم الصوت. اكتب، أو استخدم ميكروفون الكيبورد");$("#txt").focus();return}
+  if(!SR){toast("المتصفح مش بيدعم الصوت. اكتب، أو استخدم ميكروفون لوحة المفاتيح");$("#txt").focus();return}
   try{baseTxt=$("#txt").value?$("#txt").value.trim()+" ":"";want=true;restarts=0;startSR();micUI(true)}catch(e){want=false;micUI(false);toast("مقدرتش أشغل الميكروفون")}
 };
 /* AI parsing (opt-in): returns the rule-based result overlaid with validated AI fields */
@@ -555,10 +567,10 @@ async function aiMerge(text,o){
 
 /* ---------------- language reference (tap to insert) ---------------- */
 const EXAMPLES=[
- ["أتشيفمنت","أتشيفمنت: قفلت تسريب هواء في الكومبريسور ووفرت 12 ألف جنيه"],
- ["تشينج أوفر","عملت تشينج أوفر على فيته 3 وخلصناه في ساعتين"],
+ ["إنجاز","إنجاز: نجحت إني أشغّل فيته 3 بأعلى سرعة من غير رفض لمدة شهر"],
+ ["تغيير المنتج","عملت تغيير منتج على فيته 3 وخلصناه في ساعتين"],
  ["صرف من المخزن","صرفت من المخزن بلية 6205 عدد 2 لماكينة M92 خط 3"],
- ["محتاج قطع غيار","محتاج قطع غيار هيتر كود 4471 لبلستر خط 5"],
+ ["محتاج قطع غيار","محتاج قطع غيار سخان كود 4471 لبلستر خط 5"],
  ["استخدمت قطع غيار","استخدمت سير جديد وبلية في الكومبريسور"],
  ["عطل واتصلح","امبارح صلحت عطل في فيته 55 وكانت واقفة 3 ساعات"],
  ["شغل زيادة","ساعدت فريق الإنتاج في تركيب بلندر بوهل وده مش من مهامي"],
@@ -590,7 +602,7 @@ function renderLog(){
 }
 let openId=null;
 function openDetail(id){const e=S.entries.find(x=>x.id===id);if(!e)return;openId=id;
-  const F=[["التاريخ",e.date],["الماكينة",e.machine],["النوع",catAr(e.category)],["العنوان",e.title],["اللي اتعمل",e.desc],["النتيجة",e.impact],["توقف اتوفر",e.dt?e.dt+" ساعة":""],["التوفير",e.sav?fmt(e.sav)+" جنيه":""],["دليل",e.evidence],["الحالة",e.status],["المصدر",e.source],["الكلام الأصلي",e.text]];
+  const F=[["التاريخ",e.date],["الماكينة",e.machine],["النوع",catAr(e.category)],["العنوان",e.title],["اللي اتعمل",e.desc],["النتيجة",e.impact],["وقت توقف اتوفر",e.dt?e.dt+" ساعة":""],["التوفير",e.sav?fmt(e.sav)+" جنيه":""],["الدليل",e.evidence],["الحالة",isEN()?e.status:({Done:"تم",Ongoing:"جاري",Planned:"مخطط"}[e.status]||e.status)],["المصدر",isEN()?e.source:({"Voice note":"تسجيل صوتي","Text message":"رسالة نصية",Manual:"يدوي","Voice + AI":"صوت + ذكاء اصطناعي"}[e.source]||e.source)],["الكلام الأصلي",e.text]];
   $("#dBody").innerHTML=F.filter(f=>f[1]).map(f=>`<dt>${f[0]}</dt><dd dir="auto">${esc(f[1])}</dd>`).join("");$("#detail").classList.add("show")}
 $("#dClose").onclick=()=>$("#detail").classList.remove("show");
 $("#dAn").onclick=()=>{$("#detail").classList.remove("show");if(window.anForEntry)anForEntry(openId);else toast("ملف التحليل مش متحمّل")};
@@ -618,9 +630,9 @@ function renderSettings(){
   $("#mList").innerHTML=(S.machines||[]).map((m,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;margin:4px 0"><span dir="auto">${esc(m.name)}</span><button type="button" class="btn red" data-del="${i}" style="padding:4px 10px;font-size:13px">مسح</button></div>`).join("");
   $$("#mList [data-del]").forEach(b=>b.onclick=()=>{S.machines.splice(+b.dataset.del,1);save();renderAll()});
 }
-function renderAll(){$("#who").textContent=S.profile?S.profile.name:"Servier Egypt";fillSelects();renderLog();renderSummary();renderSettings();renderGloss();hints();if(window.renderAnalyses)renderAnalyses()}
+function renderAll(){if(window.renderSugg)try{renderSugg()}catch(e){}$("#who").textContent=S.profile?S.profile.name:"Servier Egypt";fillSelects();renderLog();renderSummary();renderSettings();renderGloss();hints();if(window.renderAnalyses)renderAnalyses()}
 $("#retryBtn").onclick=()=>{if(lastBlob)transcribeLast()};
-$("#aiSave").onclick=()=>{const k=$("#aiKey").value.trim(),on=$("#aiOn").checked;if(on&&!/^sk-[\w-]{16,}$/.test(k))return toast("المفتاح شكله غلط. لازم يبدأ بـ sk-");AI.set({on,key:k});toast(on?"اتفعّل الوضع الأونلاين":"اتقفل الوضع الأونلاين")};
+$("#aiSave").onclick=()=>{const k=$("#aiKey").value.trim(),on=$("#aiOn").checked;if(on&&!/^sk-[\w-]{16,}$/.test(k))return toast("المفتاح شكله غلط. لازم يبدأ بـ sk-");AI.set({on,key:k});toast(on?"اتفعّل وضع الإنترنت":"اتقفل وضع الإنترنت")};
 (function(){const c=AI.cfg;$("#aiOn").checked=!!c.on;$("#aiKey").value=c.key||""})();
 function hints(){
   const standalone=window.matchMedia("(display-mode: standalone)").matches||navigator.standalone;
@@ -698,13 +710,13 @@ $("#rsFile").onchange=async e=>{const f=e.target.files[0];e.target.value="";if(!
       S.entries.push(x);have.set(x.id,x);add++}
     if(!S.profile&&r.profile)S.profile=r.profile;
     for(const m of cleanMachines(r.machines))if(!(S.machines||[]).some(y=>y.name===m.name))(S.machines=S.machines||[]).push(m);
-    let an=0;if(window.anRestore)an=anRestore(r.analyses);
+    let an=0;if(window.anRestore)an=anRestore(r.analyses);const sgn=window.sgRestore?sgRestore(r.sg):0;if(sgn)setTimeout(()=>toast(tr("اتضاف ")+sgn+(isEN()?(window.I18N.isFR()?" idées":" suggestions"):" اقتراح")),1600);
     save();renderAll();toast("اتضاف "+add+" شغلانة"+(an?" و"+an+" تحليل":""))}catch(err){toast("الملف ده مش نسخة احتياطية صحيحة")}};
 $("#saveProfile").onclick=()=>{const n=$("#sName").value.trim();if(!n)return toast("اكتب الاسم");S.profile={name:n,role:$("#sRole").value};save();renderAll();toast("اتحفظ")};
 $("#mAdd").onclick=()=>{const n=$("#mName").value.trim();if(!n)return toast("اكتب اسم الماكينة");
   S.machines=S.machines||[];S.machines.push({name:n,building:$("#mBld").value,area:"",aliases:$("#mAl").value.split(/[,،]/).map(x=>x.trim()).filter(Boolean).concat([n])});
   save();$("#mName").value="";$("#mAl").value="";renderAll();toast("اتضافت")};
-$("#wipe").onclick=()=>{if(!confirm(tr("هتمسح كل شغلك من الموبايل. بعت الملف قبل كده؟")))return;if(!confirm(tr("متأكد؟ مفيش رجعة.")))return;try{localStorage.removeItem(K);localStorage.removeItem(AIK)}catch(e){}S={profile:S.profile,entries:[],machines:[],analyses:[],lastExport:null};save();renderAll();toast("اتمسح")};
+$("#wipe").onclick=()=>{if(!confirm(tr("هتمسح كل شغلك من الموبايل. بعت الملف قبل كده؟")))return;if(!confirm(tr("متأكد؟ مفيش رجعة.")))return;try{localStorage.removeItem(K);localStorage.removeItem(AIK)}catch(e){}S={profile:S.profile,entries:[],machines:[],analyses:[],sg:[],lastExport:null};save();renderAll();toast("اتمسح")};
 
 /* ---------------- report ---------------- */
 $("#reportBtn").onclick=()=>{
@@ -730,6 +742,9 @@ if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.s
 <script src="kb.js"></script>
 <script src="coach.js"></script>
 <script src="analysis.js"></script>
+<script src="sugg_kb.js"></script>
+<script src="suggest.js"></script>
+<script src="i18n_fr.js"></script>
 <script src="i18n.js"></script>
 </body>
 </html>

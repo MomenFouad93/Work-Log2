@@ -1,4 +1,4 @@
-/* Analysis coach knowledge base: engineering (process, packaging, utilities) + Operational Excellence. Generated 2026-11-16. */
+/* Analysis coach knowledge base: engineering (process, packaging, utilities) + Operational Excellence. Generated 2026-11-17. */
 /* KB File A - process equipment engineering knowledge (gran, blend, press, caps, coat)
  Servier Egypt Cairo site - Acacia building. Plain JS, no imports. */
 (function () {
@@ -30,7 +30,7 @@
  symptoms: [
  s("a_gran_dp", "dP فلتر الـFBD عالي / الفلتر بيتسد", "FBD filter dP high / filter blockage",
  ["a_c_gr_bag_blind", "a_c_gr_shake", "a_c_material_var", "a_c_ahu_inlet"], ["contamination"]),
- s("a_gran_psd", "حجم الجرانيول (PSD) خارج المدى", "Granule size (PSD) out of range",
+ s("a_gran_psd", "حجم الحبيبات (PSD) خارج المدى", "Granule size (PSD) out of range",
  ["a_c_gr_binder", "a_c_gr_mill", "a_c_gr_power", "a_c_material_var", "a_c_param_set"], ["defects"]),
  s("a_gran_endpoint", "الـend point (power/torque) مش بيتوصله أو بيتوصل بدري", "End point (power/torque) not reached or reached early",
  ["a_c_gr_power", "a_c_gr_binder", "a_c_material_var", "a_c_param_set"]),
@@ -73,7 +73,7 @@
  ],
  parts: [p("spindle/nut عمود الرفع", "Lifting column spindle / nut"), p("فرامل الرفع أو الدوران", "Lift or rotation brake"),
  p("gearbox الدوران", "Rotation gearbox"), p("cylinder الـclamping", "Bin clamping cylinder"),
- p("سنسور proximity / limit switch", "Proximity / limit switch"), p("seal الـbutterfly valve", "Bin butterfly valve seal"),
+ p("حساس proximity / limit switch", "Proximity / limit switch"), p("seal الـbutterfly valve", "Bin butterfly valve seal"),
  p("interlock switch الباب", "Door interlock switch"), p("موتور / VFD", "Motor / VFD")]
  },
  press: {
@@ -159,10 +159,10 @@
 
  var causes = {
  /* ---------- shared ---------- */
- a_c_material_var: c("تغير في خواص الخامة/الجرانيول/الـcores (PSD، رطوبة، flow)", "Material/granule/core property shift (PSD, moisture, flow)",
+ a_c_material_var: c("تغير في خواص الخامة/الحبيبات/الـcores (PSD، رطوبة، flow)", "Material/granule/core property shift (PSD, moisture, flow)",
  "materials", ["new_material_batch", "supplier", "defects"],
  ["قارن LOD وPSD للباتش ده بباتشات كانت كويسة، وراجع الـCoA", "Compare LOD/PSD of this batch with good batches; review CoA"],
- [["الجرانيول فيه fines زيادة أو رطوبة خارج المدى", "Granule has excess fines or moisture out of range"],
+ [["الحبيبات فيها fines زيادة أو رطوبة خارج المدى", "Granule has excess fines or moisture out of range"],
  ["خطوة التحبيب/التجفيف أو الخامة الجاية اتغيرت", "Granulation/drying step or incoming raw material varied"],
  ["مفيش check لـPSD/LOD قبل ما يتسلم للمرحلة اللي بعدها", "No PSD/LOD release check before handing to next step"],
  ["الـspec مع المورد مش بيغطي الخاصية دي", "Supplier spec does not cover this property"]],
@@ -351,7 +351,7 @@
  a_c_gr_mill: c("screen الـmill دايب أو مقاسه غلط أو السرعة مش مظبوطة", "Mill screen worn or wrong size, or wrong mill speed",
  "machines", ["wear_age", "after_changeover", "setting_change"],
  ["افحص الـscreen: المقاس مكتوب عليه؟ في قطع أو تآكل؟ قارن السرعة بالـrecipe", "Inspect screen: size marked? torn or worn? compare speed with recipe"],
- [["حجم الجرانيول خارج المدى", "Granule size out of range"],
+ [["حجم الحبيبات خارج المدى", "Granule size out of range"],
  ["screen غلط أو تالف اتركب", "Wrong or damaged screen fitted"],
  ["الـscreens مش متعلمة ومفيش فحص قبل/بعد الاستخدام", "Screens not identified; no check before/after use"]],
  ["a_cm_t_replace", "a_cm_t_segregate"], ["a_cm_screen_std", "a_cm_recipe_lock"], ["a_k_yield"]),
@@ -664,7 +664,7 @@
  a_cm_t_filter: m("غير/نضف الفلاتر واتأكد من الـdP بعد التشغيل", "Change/clean filters and confirm dP after restart", "temporary", "H", "L", "M"),
  /* shared permanent */
  a_cm_mat_spec: m("حدّث spec الخامة مع المورد (PSD/رطوبة/flow) عن طريق الـQA", "Tighten material spec with supplier (PSD/moisture/flow) via QA", "standard", "H", "H", "Q"),
- a_cm_upstream_ipc: m("check LOD/PSD قبل تسليم الجرانيول للمرحلة اللي بعدها", "LOD/PSD release check before granule moves to next step", "standard", "H", "L", "P"),
+ a_cm_upstream_ipc: m("check LOD/PSD قبل تسليم الحبيبات للمرحلة اللي بعدها", "LOD/PSD release check before granule moves to next step", "standard", "H", "L", "P"),
  a_cm_hvac_alarm: m("alarm للـRH/الحرارة عند الماكينة مع hold limit (change control)", "Room RH/temperature alarm at machine with hold limit (change control)", "poka_yoke", "H", "H", "E"),
  a_cm_ahu_pm: m("PM للـAHU/dehumidifier: coil، wheel، فلاتر + performance check", "AHU/dehumidifier PM: coil, wheel, filters plus performance check", "pm", "H", "L", "U"),
  a_cm_steam_pm: m("trap survey دوري وPM/calibration للـcontrol valves", "Periodic steam trap survey and control valve PM/calibration", "pm", "H", "L", "U"),
@@ -738,11 +738,11 @@
  a_k_mtbf: { ar: "الـMTBF", en: "MTBF", unit: "h" },
  a_k_minor_stops: { ar: "عدد الوقفات الصغيرة في الوردية", en: "Minor stops per shift", unit: "count" },
  a_k_tool_life: { ar: "عمر طقم الـpunches", en: "Punch set life", unit: "M tablets" },
- a_k_dp: { ar: "dP الفلتر آخر الباتش", en: "Filter dP at end of batch", unit: "mbar" },
+ a_k_dp: { ar: "dP الفلتر آخر التشغيلة", en: "Filter dP at end of batch", unit: "mbar" },
  a_k_dry_time: { ar: "وقت التجفيف/الـprocess للباتش", en: "Drying/process time per batch", unit: "min" },
- a_k_yield: { ar: "الـyield بتاع الباتش", en: "Batch yield", unit: "%" },
+ a_k_yield: { ar: "الـyield بتاع التشغيلة", en: "Batch yield", unit: "%" },
  a_k_coat_def: { ar: "نسبة عيوب الـcoating", en: "Coating defect rate", unit: "%" },
- a_k_gun_stops: { ar: "عدد سدات الـguns في الباتش", en: "Gun blockages per batch", unit: "count" },
+ a_k_gun_stops: { ar: "عدد مرات انسداد الـguns في التشغيلة", en: "Gun blockages per batch", unit: "count" },
  a_k_rh_exc: { ar: "عدد مرات الـRH بره الحد في الشهر", en: "Room RH excursions per month", unit: "count" },
  a_k_bu: { ar: "الـRSD للـblend uniformity", en: "Blend uniformity RSD", unit: "%" }
  };
@@ -1664,19 +1664,19 @@ window.KB_ENG_B = { families: families, causes: causes, cms: cms, kpis: kpis };
  /* ---------------- Kaizen losses (TPM major losses + 8 wastes, merged) ---------------- */
  var LOSSES = [
  O("l_breakdown", "أعطال (breakdown)", "Breakdown / equipment failure", ["mechanical", "electrical", "wear_age"]),
- O("l_setup", "Setup و changeover و ضبط", "Setup, changeover and adjustment", ["setup_loss", "after_changeover"]),
- O("l_cleaning", "وقت تنظيف و تغيير tools", "Cleaning and tool change time", ["after_cleaning", "setup_loss"]),
+ O("l_setup", "Setup وchangeover وضبط", "Setup, changeover and adjustment", ["setup_loss", "after_changeover"]),
+ O("l_cleaning", "وقت التنظيف وتغيير الـtools", "Cleaning and tool change time", ["after_cleaning", "setup_loss"]),
  O("l_minor", "وقفات صغيرة (minor stops)", "Minor stops and idling", ["minor_stops", "sensor"]),
  O("l_speed", "سرعة أقل من الـrated", "Reduced speed", ["speed_loss"]),
  O("l_startup", "رفض أول التشغيل (start-up)", "Start-up and yield loss", ["startup_loss"]),
  O("l_defects", "عيوب و rework", "Defects and rework", ["defects"]),
  O("l_waiting", "انتظار (QA، خامة، قطعة، قرار)", "Waiting (QA, material, part, decision)", ["waiting", "planning"]),
- O("l_motion", "حركة و مشي زيادة", "Motion and walking", ["motion"]),
- O("l_transport", "نقل و شيل و حط", "Transport and handling", ["handling"]),
+ O("l_motion", "حركة ومشي زيادة", "Motion and walking", ["motion"]),
+ O("l_transport", "نقل وشيل وحط", "Transport and handling", ["handling"]),
  O("l_inventory", "مخزون زيادة أو ناقص", "Excess or wrong inventory", ["storage", "planning"]),
  O("l_overproc", "خطوات زيادة ملهاش قيمة", "Over-processing (non-value steps)", ["procedure_gap"]),
  O("l_overprod", "إنتاج زيادة أو بدري", "Overproduction", ["planning"]),
- O("l_skills", "أفكار و مهارات الناس مش مستغلة", "Unused skills and ideas", ["training_gap"]),
+ O("l_skills", "أفكار ومهارات الناس مش مستغلة", "Unused skills and ideas", ["training_gap"]),
  O("l_energy", "هدر طاقة و utilities", "Energy and utility waste", ["energy_waste", "leak"]),
  O("l_safety", "خطر سلامة أو ergonomics", "Safety and ergonomic risk", ["safety_guard", "ergonomics"])
  ];
@@ -1744,10 +1744,10 @@ window.KB_ENG_B = { families: families, causes: causes, cms: cms, kpis: kpis };
  ["o_cm_hold"], ["o_cm_alarm_limits", "o_cm_cal_prog", "o_cm_change_ctrl"], ["o_k_dev_count"]),
  o_c_gq_doc: C("غلطة GDP: entry ناقص، تصحيح غلط، تسجيل متأخر", "GDP error: missing entry, wrong correction, late record", "methods",
  ["documentation", "procedure_gap"],
- ["راجع الـBMR/logbook وحدد نوع الغلطة وفين في الفورم", "Review BMR / logbook; classify error type and where on the form"],
+ ["راجع الـBMR/logbook وحدد نوع الغلطة وفين في النموذج", "Review BMR / logbook; classify error type and where on the form"],
  [["التسجيل بيتعمل بعد النشاط مش وقته", "Records written after the activity, not during"],
- ["الفورم مش ماشي بترتيب الشغل ومفيهوش مكان كفاية", "Form does not follow work sequence, too little space"],
- ["الفورم متصممش مع المستخدم ومفيش check عند الخطوة", "Form not designed with users, no check at the step"]],
+ ["النموذج مش ماشي بترتيب الشغل ومفيهوش مكان كفاية", "Form does not follow work sequence, too little space"],
+ ["النموذج ماتصممش مع المستخدم ومفيش check عند الخطوة", "Form not designed with users, no check at the step"]],
  ["o_cm_hold"], ["o_cm_e_record", "o_cm_form_redesign", "o_cm_gdp_check"], ["o_k_gdp_err"]),
  o_c_gq_train: C("ثغرة في نظام التدريب (المهمة مش في الـmatrix)", "Training system gap (task not in qualification matrix)", "man",
  ["training_gap", "new_operator", "procedure_gap"],
@@ -1767,7 +1767,7 @@ window.KB_ENG_B = { families: families, causes: causes, cms: cms, kpis: kpis };
  ["plc_software", "software_change", "documentation"],
  ["راجع الـuser accounts والـroles والـaudit trail على الـHMI/SCADA", "Review user accounts, roles and audit trail on HMI / SCADA"],
  [["فيه accounts مشتركة أو audit trail مش بيتراجع", "Shared accounts or audit trail not reviewed"],
- ["السيستم اتعمله setup من غير DI review", "System configured without a DI review"],
+ ["النظام اتعمله setup من غير DI review", "System configured without a DI review"],
  ["مفيش periodic review للـaccess والـaudit trail", "No periodic access and audit-trail review"]],
  ["o_cm_hold"], ["o_cm_di_access", "o_cm_di_review", "o_cm_change_ctrl"], ["o_k_dev_count"]),
  o_c_gq_cont: C("مصدر تلوث مش متحكم فيه (شحم، برادة، تراب)", "Contamination source not controlled (lube, wear debris, dust)", "machines",
@@ -1832,7 +1832,7 @@ window.KB_ENG_B = { families: families, causes: causes, cms: cms, kpis: kpis };
  ["o_cm_tag_tmp"], ["o_cm_leak_route", "o_cm_en_kpi"], ["o_k_air", "o_k_leaks"]),
  o_c_en_idle: C("مفيش auto-off أو idle mode والماكينة مش بتنتج", "No auto-off or idle mode when not producing", "machines",
  ["energy_waste", "design_weakness", "planning"],
- ["سجّل استهلاك الـkWh والهوا وقت الـbreaks والويك إند", "Log kWh and air use during breaks and weekends"],
+ ["سجّل استهلاك الـkWh والهوا وقت الـbreaks والإجازة الأسبوعية", "Log kWh and air use during breaks and weekends"],
  [["ماكينات أو AHUs شغالة من غير إنتاج", "Machines or AHUs run with no production"],
  ["مفيش idle mode ولا schedule للإطفاء", "No idle mode and no switch-off schedule"],
  ["الإطفاء مش في end-of-shift standard ولا في التصميم", "Switch-off not in end-of-shift standard or design"]],
@@ -2004,7 +2004,7 @@ window.KB_ENG_B = { families: families, causes: causes, cms: cms, kpis: kpis };
  o_cm_change_ctrl: M("standard", "H", "L", OW.qa, "أي تغيير يعدي على change control بالـimpact assessment", "All changes through change control with impact assessment"),
  o_cm_alarm_limits: M("poka_yoke", "H", "L", OW.eng, "alarm/interlock على الـvalidated limits (change control)", "Alarm / interlock at validated limits (via change control)"),
  o_cm_cal_prog: M("pm", "H", "L", OW.mnt, "كل الأجهزة في calibration plan على SAP PM بـalerts", "All instruments in SAP PM calibration plan with alerts"),
- o_cm_form_redesign: M("design", "H", "L", OW.qa, "إعادة تصميم الفورم بترتيب الشغل وحقول إلزامية", "Redesign form in work sequence with mandatory fields"),
+ o_cm_form_redesign: M("design", "H", "L", OW.qa, "إعادة تصميم النموذج بترتيب الشغل وحقول إلزامية", "Redesign form in work sequence with mandatory fields"),
  o_cm_e_record: M("eliminate", "H", "H", OW.eng, "تسجيل إلكتروني بحقول إلزامية بدل الورق", "Electronic record with mandatory fields instead of paper"),
  o_cm_gdp_check: M("inspection", "L", "L", OW.prod, "مراجعة GDP آخر كل وردية", "GDP check at end of each shift"),
  o_cm_skill_matrix: M("standard", "H", "L", OW.prod, "qualification matrix محدثة لكل مهمة", "Up-to-date qualification matrix per task"),
@@ -2032,7 +2032,7 @@ window.KB_ENG_B = { families: families, causes: causes, cms: cms, kpis: kpis };
  /* energy */
  o_cm_leak_route: M("pm", "H", "L", OW.mnt, "leak survey كل 3 شهور و tag-and-fix خلال أسبوعين", "Quarterly leak survey; tag and fix within 2 weeks"),
  o_cm_auto_off: M("design", "H", "L", OW.eng, "idle mode و solenoid يقفل الهوا عند الوقف (change control)", "Idle mode; solenoid cuts air on stop (via change control)"),
- o_cm_shutdown_std: M("standard", "L", "L", OW.prod, "shutdown checklist آخر الوردية والويك إند", "End-of-shift and weekend shutdown checklist"),
+ o_cm_shutdown_std: M("standard", "L", "L", OW.prod, "shutdown checklist آخر الوردية والإجازة الأسبوعية", "End-of-shift and weekend shutdown checklist"),
  o_cm_bms_sched: M("design", "H", "L", OW.eng, "schedules و setback على الـBMS للأماكن الفاضية", "BMS schedules and setback for unoccupied areas"),
  o_cm_setpoint_reg: M("standard", "H", "L", OW.eng, "setpoint register بالـGMP limit والتبرير", "Setpoint register with GMP limit and justification"),
  o_cm_press_opt: M("design", "H", "L", OW.eng, "تقليل ضغط الـheader بعد demand study و booster محلي", "Lower header pressure after demand study; local booster"),
@@ -2206,7 +2206,7 @@ window.KB_ENG_B = { families: families, causes: causes, cms: cms, kpis: kpis };
  checked: { ar: "إيه اللي اتفحص واستبعدته؟", en: "What was already checked / ruled out?", type: "multi", other: true,
  options: [O("utilities", "الـutilities (هوا، كهربا)", "Utilities (air, power)", ["utility_air", "utility_power"]), O("sensors", "الـsensors", "Sensors", ["sensor"]), O("settings", "الضبط مقابل الـSOP", "Settings vs SOP", ["setting_change"]),
  O("wear", "تآكل القطع", "Part wear", ["wear_age", "mechanical"]), O("lube", "التشحيم", "Lubrication", ["lubrication"]), O("elec", "الكهربا و الـwiring", "Electrical / wiring", ["electrical"]),
- O("plc", "alarms و history الـPLC", "PLC alarms and history", ["plc_software"]), O("material", "الخامة / الباتش", "Material / batch", ["new_material_batch"]), O("records", "السجلات و الـlogbook", "Records and logbook", ["documentation"]), O("nothing", "لسه مفحصتش", "Nothing checked yet")],
+ O("plc", "alarms و history الـPLC", "PLC alarms and history", ["plc_software"]), O("material", "الخامة / التشغيلة", "Material / batch", ["new_material_batch"]), O("records", "السجلات و الـlogbook", "Records and logbook", ["documentation"]), O("nothing", "لسه مفحصتش", "Nothing checked yet")],
  byCat: {
  "Changeover": [O("video", "video و timing للخطوات", "Video and step timing", ["setup_loss"]), O("kit", "الـkit والقطع", "Kit and parts", ["planning"]), O("settings", "قيم الضبط", "Setting values", ["setting_change"]), O("parts", "حالة قطع الـformat", "Format part condition", ["wear_age"]), O("qa_time", "وقت انتظار QA", "QA waiting time", ["waiting"]), O("nothing", "لسه", "Nothing yet")],
  "GMP / Quality": [O("sop", "الـSOP مقابل الشغل", "SOP vs practice", ["procedure_gap"]), O("trend", "trend الـparameters", "Parameter trends", ["setting_change"]), O("cal", "حالة الـcalibration", "Calibration status", ["calibration"]), O("training", "سجلات التدريب", "Training records", ["training_gap"]), O("audit", "الـaudit trail", "Audit trail", ["plc_software"]), O("env", "الـBMS (temp/RH/dP)", "BMS temp / RH / dP", ["env_heat_humidity"]), O("nothing", "لسه", "Nothing yet")],
@@ -2215,12 +2215,12 @@ window.KB_ENG_B = { families: families, causes: causes, cms: cms, kpis: kpis };
  "Spare Parts Needed": [O("sap", "رصيد SAP و min/max", "SAP stock and min/max", ["planning"]), O("bom", "الـBOM والـpart no.", "BOM and part no.", ["documentation"]), O("supplier", "المورد والـlead time", "Supplier and lead time", ["supplier"]), O("store", "حالة التخزين", "Storage condition", ["storage"]), O("nothing", "لسه", "Nothing yet")],
  "Warehouse Issue": [O("sap", "حركات SAP", "SAP transactions", ["documentation"]), O("loc", "الـlocation والـlabel", "Location and label", ["storage"]), O("pick", "طريقة الصرف", "Picking method", ["handling"]), O("fifo", "التواريخ و FIFO", "Dates and FIFO", ["storage"]), O("nothing", "لسه", "Nothing yet")]
  } },
- impact6: { ar: "أثرت على إيه؟", en: "What did it affect?", type: "multi",
+ impact6: { ar: "حسّنت إيه؟", en: "What did it affect?", type: "multi",
  options: [O("Q", "الجودة (Q)", "Quality (Q)"), O("C", "التكلفة (C)", "Cost (C)"), O("D", "التسليم/الإنتاج (D)", "Delivery / output (D)"), O("S", "السلامة (S)", "Safety (S)"), O("CSR", "البيئة والمجتمع (CSR)", "Environment / CSR"), O("E", "الناس والـengagement (E)", "People / engagement (E)")] },
  who: { ar: "مين في الفريق؟", en: "Who is in the team?", type: "multi", other: true,
  options: [O("maintenance", "الصيانة", "Maintenance"), O("production", "الإنتاج", "Production"), O("qa", "الجودة QA", "QA"), O("qc", "الرقابة QC", "QC"), O("engineering", "الهندسة", "Engineering"), O("warehouse", "المخزن", "Warehouse"), O("hse", "السلامة HSE", "HSE"), O("supplier", "المورد / الـOEM", "Supplier / OEM")] },
  gmp_imp: { ar: "فيه تأثير على المنتج؟", en: "Product impact?", hint: B("لو مش متأكد اختار مش معروف وبلّغ QA", "If unsure pick unknown and inform QA"), type: "single",
- options: [O("none", "مفيش تلامس مع المنتج", "No product contact"), O("held", "المنتج اتعمله hold", "Product on hold", ["defects"]), O("batch_risk", "باتش تحت خطر", "Batch at risk", ["defects"]), O("released", "ممكن يكون منتج released", "Released product may be affected", ["defects"]), O("unknown", "مش معروف", "Unknown")] },
+ options: [O("none", "مفيش تلامس مع المنتج", "No product contact"), O("held", "المنتج اتعمله hold", "Product on hold", ["defects"]), O("batch_risk", "تشغيلة (Batch) تحت خطر", "Batch at risk", ["defects"]), O("released", "ممكن يكون منتج released", "Released product may be affected", ["defects"]), O("unknown", "مش معروف", "Unknown")] },
  qa_note: { ar: "QA اتبلغ؟", en: "Was QA notified?", type: "single",
  options: [O("yes_dev", "أيوه و deviation اتفتح", "Yes, deviation raised"), O("yes_qa", "أيوه، مستنيين قرار QA", "Yes, awaiting QA decision"), O("no", "لأ لسه", "Not yet"), O("na", "مش محتاج (مفيش أثر GMP)", "Not needed (no GMP impact)")] },
  loto: { ar: "الـLOTO اتعمل؟", en: "Was LOTO applied?", type: "single",
@@ -2229,7 +2229,7 @@ window.KB_ENG_B = { families: families, causes: causes, cms: cms, kpis: kpis };
  options: [O("reported", "أيوه، near miss / incident متسجل", "Yes, near miss / incident logged"), O("not_yet", "لأ لسه", "Not yet")] },
  kz_kind: { ar: "نوع الـKaizen؟", en: "Kaizen type?", type: "single",
  options: [O("quick", "Quick Kaizen (أيام، فرد أو اتنين)", "Quick Kaizen (days, 1-2 people)"), O("event", "Kaizen event (ورشة 3-5 أيام)", "Kaizen event (3-5 day workshop)"), O("standard", "Standard Kaizen (تحسين الـstandard)", "Standard Kaizen (improve the standard)")] },
- kz_loss: { ar: "الـKaizen بيهاجم أنهي loss؟", en: "Which loss does it attack?", type: "multi", other: true, options: LOSSES },
+ kz_loss: { ar: "الـKaizen بيقلل أنهي هدر؟", en: "Which loss does it attack?", type: "multi", other: true, options: LOSSES },
  kz_before: { ar: "الوضع الحالي (بالأرقام)", en: "Current situation (with numbers)", hint: B("مثلا: changeover 150 دقيقة، 18 مرة في الشهر", "e.g. changeover 150 min, 18 per month"), type: "text", other: true },
  kz_metric: { ar: "أنهي KPI هيتحسن؟", en: "Which KPI improves?", type: "single", other: true,
  options: [O("co_time", "وقت الـchangeover (min)", "Changeover time (min)", ["setup_loss"]), O("oee", "الـOEE (%)", "OEE (%)"), O("downtime", "وقف (h)", "Downtime (h)", ["mechanical"]), O("mtbf", "الـMTBF (h)", "MTBF (h)", ["wear_age"]),
@@ -2247,7 +2247,7 @@ window.KB_ENG_B = { families: families, causes: causes, cms: cms, kpis: kpis };
 
  /* ---------------- triage ---------------- */
  var triage = [
- { id: "tr_kind", ar: "ده مشكلة حصلت ولا فكرة تحسين؟", en: "Is this a problem that happened or an improvement idea?", type: "single",
+ { id: "tr_kind", ar: "دي مشكلة حصلت ولا فكرة تحسين؟", en: "Is this a problem that happened or an improvement idea?", type: "single",
  options: [O("problem", "مشكلة حصلت (عطل، deviation، حادثة)", "A problem happened (failure, deviation, incident)"), O("improve", "فكرة تحسين (مفيش عطل، فيه loss)", "Improvement idea (no failure, a loss to reduce)")] },
  { id: "tr_size", ar: "حجم الأثر قد إيه؟", en: "How big is the impact?", type: "single",
  options: [O("small", "صغير (أقل من ساعة أو 5,000 جنيه)", "Small (< 1 h or < 5,000 EGP)"), O("medium", "متوسط (1-4 ساعات أو 5-20 ألف)", "Medium (1-4 h or 5-20k EGP)"), O("big", "كبير (أكتر من 4 ساعات أو 20 ألف)", "Big (> 4 h or > 20k EGP)")] },
@@ -2261,7 +2261,7 @@ window.KB_ENG_B = { families: families, causes: causes, cms: cms, kpis: kpis };
 
  /* ---------------- tools ---------------- */
  var tools = {
- "3C": { ar: "كارت 3C", en: "3C card",
+ "3C": { ar: "بطاقة 3C", en: "3C card",
  when: B("مشكلة صغيرة أول مرة، السبب واضح أو بيتأكد بسرعة، أثر أقل من 4 ساعات، مفيش خطر سلامة أو GMP مفتوح.", "Small, first-time problem; cause clear or quick to confirm; under 4 h loss; no open safety or GMP risk."),
  notWhen: B("لو اتكررت 4 مرات أو أكتر، أو السبب مش معروف بعد أول فحص، أو فيه أثر على المنتج أو السلامة، أو خسارة كبيرة: استخدم A3.", "Not for 4+ repeats, cause still unknown after first checks, product or safety impact, or big loss: use A3."),
  time: B("15-30 دقيقة، ويتقفل في نفس الوردية أو الأسبوع.", "15-30 min; closed within the shift or week.") },
@@ -2269,7 +2269,7 @@ window.KB_ENG_B = { families: families, causes: causes, cms: cms, kpis: kpis };
  when: B("مشكلة بتتكرر، أو كبيرة (أكتر من 4 ساعات أو 20 ألف جنيه)، أو سببها مش معروف، أو فيها GMP/سلامة، أو محتاجة أكتر من قسم.", "Recurring or big problem (>4 h or >20k EGP), unknown cause, GMP / safety impact, or cross-functional."),
  notWhen: B("مش لمشكلة بسيطة سببها واضح (3C)، ولا لفكرة تحسين من غير مشكلة (Kaizen).", "Not for a simple problem with a clear cause (3C) or an improvement idea with no failure (Kaizen)."),
  time: B("2-6 أسابيع، فريق 3-6 أفراد، review أسبوعي، و follow-up 4-8 أسابيع.", "2-6 weeks, team of 3-6, weekly review, 4-8 weeks follow-up.") },
- "Kaizen": { ar: "كايزن Kaizen", en: "Kaizen",
+ "Kaizen": { ar: "Kaizen (تحسين مستمر)", en: "Kaizen",
  when: B("مفيش عطل لكن فيه loss واضح ممكن يقل: changeover، طاقة، حركة، minor stops، ergonomics. ولازم before/after بالأرقام.", "No failure but a clear loss to cut: changeover, energy, motion, minor stops, ergonomics. Needs before / after numbers."),
  notWhen: B("مش لعطل محتاج root cause (3C/A3). تغيير في ماكينة أو process تحت GMP لازم يعدي على change control.", "Not for a failure needing root cause (3C / A3). Changes to GMP equipment or process go through change control."),
  time: B("Quick Kaizen 1-5 أيام. Kaizen event ورشة 3-5 أيام. تأكيد النتيجة بعد 4 أسابيع.", "Quick Kaizen 1-5 days. Kaizen event 3-5 day workshop. Confirm results after 4 weeks.") }
@@ -2462,7 +2462,7 @@ if(CA.o_c_sf_ergo)CA.o_c_sf_ergo.cont=["o_cm_lift_stop"];
 /* 4. serialization content */
 B.cms.b_cm_ser_recon=Object.assign(b("reconciliation للـserials: decommission للأكواد المرفوضة في الـL3 ومراجعة QA","Reconcile serials: decommission rejected codes in L3, QA review"),{kind:"temporary",impact:"H",effort:"L",owner:b("الجودة QA","QA")});
 B.cms.b_cm_print_window=Object.assign(b("print window من غير varnish في الـartwork والـspec","Varnish-free print window in artwork and material spec"),{kind:"design",impact:"H",effort:"H",owner:b("التعبئة / الـArtwork","Packaging / Artwork")});
-B.cms.b_cm_l3_check=Object.assign(b("تحميل الأوردر من الـL3 أوتوماتيك وتأكيد شخص تاني عند البداية","Automatic L3 order download plus second-person check at order start"),{kind:"poka_yoke",impact:"H",effort:"H",owner:b("الأوتوميشن","Automation")});
+B.cms.b_cm_l3_check=Object.assign(b("تحميل الأوردر من الـL3 أوتوماتيك وتأكيد شخص تاني عند البداية","Automatic L3 order download plus second-person check at order start"),{kind:"poka_yoke",impact:"H",effort:"H",owner:b("الأتمتة (Automation)","Automation")});
 B.causes.b_c_ct_varnish=Object.assign(b("الكود بيتطبع على varnish أو برا الـprint area","Code printed on varnish or outside the print area"),{fish:"materials",tags:["new_material_batch","supplier","defects"],
   check:b("قارن مكان الطباعة بالـartwork والـspec واعمل rub test","Compare print area with artwork and spec; do a rub test"),
   why:[b("الحبر مش بيمسك على الـvarnish فالـgrade بيقع","Ink does not key on varnish, code grade drops"),b("الـartwork مفيهوش print window من غير varnish","Artwork has no varnish-free print window"),b("مكان الطباعة مش مكتوب في spec مادة التعبئة","Print area not defined in the packaging material spec")],

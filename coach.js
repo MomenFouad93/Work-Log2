@@ -4,9 +4,12 @@
    Knowledge base: kb.js (engineering + OpEx). Globals used from index.html: S, $, $$, esc, today, toast, machines, AI, whisper, isEN */
 
 /* ---------- helpers ---------- */
-const L=o=>o?(isEN()?(o.en||o.ar||""):(o.ar||o.en||"")):"";
-const T2=(ar,en)=>isEN()?en:ar;
-let SLANG="en";const SL=o=>o?(SLANG==="ar"?(o.ar||o.en||""):(o.en||o.ar||"")):"";const ST=(ar,en)=>SLANG==="ar"?ar:en;
+const FR=()=>!!(window.I18N&&I18N.isFR&&I18N.isFR()),fr=s=>window.I18N&&I18N.fr?I18N.fr(s):s
+const L=o=>o?(isEN()?(FR()?(o.fr||fr(o.en||"")||o.ar):(o.en||o.ar||"")):(o.ar||o.en||"")):"";
+const T2=(ar,en)=>isEN()?(FR()?fr(en):en):ar;
+let SLANG="en";const SL=o=>o?(SLANG==="ar"?(o.ar||o.en||""):SLANG==="fr"?(o.fr||frF(o.en||"")||o.ar||""):(o.en||o.ar||"")):"";const ST=(ar,en)=>SLANG==="ar"?ar:SLANG==="fr"?frF(en):en;
+const frF=s=>window.I18N&&I18N.frForce?I18N.frForce(s):s;
+const uiLang=()=>FR()?"fr":isEN()?"en":"ar";
 const num=v=>{const n=parseFloat(String(v==null?"":v).replace(/,/g,""));return isFinite(n)?n:null};
 const fmtN=n=>n==null?"":(Math.round(n*100)/100).toLocaleString("en-US");
 const addDays=(d,n)=>{const x=new Date((d||today())+"T00:00:00");x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)};
@@ -134,7 +137,7 @@ function problemStatement(AD,cx){
 }
 function actualText(AD,cx){
   const a=ans(AD,"act").t||"",co=num(ans(AD,"co_min").v),sp=num(ans(AD,"sp_days").v),sd=ans(AD,"sym").t||"";
-  return [a.trim(),co!=null?ST("التشينج أوفر خد ","changeover took ")+fmtN(co)+" min":"",sp!=null?ST("مستنيين القطعة "," waiting ")+fmtN(sp)+ST(" يوم"," days for the part"):"",!a&&sd&&sd!==AD.title?sd.trim():""].filter(Boolean).join(ST("، ","; "));
+  return [a.trim(),co!=null?ST("تغيير المنتج خد ","changeover took ")+fmtN(co)+" min":"",sp!=null?ST("مستنيين القطعة "," waiting ")+fmtN(sp)+ST(" يوم"," days for the part"):"",!a&&sd&&sd!==AD.title?sd.trim():""].filter(Boolean).join(ST("، ","; "));
 }
 const dmy=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s||"");return m?`${m[3]}/${m[2]}/${m[1]}`:(s||"")};
 
@@ -159,7 +162,7 @@ function triageRec(tr){ // tr: {tr_kind, tr_size, tr_rep, tr_known, tr_crit}
 }
 /* ---------- coaching rules ---------- */
 function evalRules(AD,cx){
-  if(!Object.keys(IV(AD)).length&&JSON.stringify(AD.data).replace(/"(date|opened|start|kind)":"[^"]*"/g,"").match(/"[^"]{12,}"/))return[{id:"_legacy",sev:"low",ar:"التحليل ده اتعمل قبل الأسئلة الجديدة. جاوب الأسئلة لو عايز المساعد يراجعه، أو عدّل الشيت على طول.",en:"This analysis was made before the guided questions. Answer them if you want the coach to review it, or edit the sheet directly.",fix:null}];
+  if(!Object.keys(IV(AD)).length&&JSON.stringify(AD.data).replace(/"(date|opened|start|kind)":"[^"]*"/g,"").match(/"[^"]{12,}"/))return[{id:"_legacy",sev:"low",ar:"التحليل ده اتعمل قبل الأسئلة الجديدة. جاوب الأسئلة لو عايز المساعد يراجعه، أو عدّل النموذج على طول.",en:"This analysis was made before the guided questions. Answer them if you want the coach to review it, or edit the sheet directly.",fix:null}];
   const O=kb().O,z=picks(AD,cx),K=kb(),out=[];
   const allText=()=>[CZ(AD).ps||"",...Object.values(IV(AD)).map(a=>a.t||""),...custom(AD).map(x=>x.text)].join(" ");
   const has=(id)=>{const a=ans(AD,id);return (Array.isArray(a.v)?a.v.length:(a.v!=null&&a.v!==""))||(a.t&&a.t.trim())};
@@ -194,7 +197,7 @@ function evalRules(AD,cx){
 /* ---------- build the sheet data from interview + engine ---------- */
 function sameFamily(AD){const f=famOf(AD.machine);return machines().filter(m=>m.name!==AD.machine&&famOf(m.name)===f&&f!=="general").map(m=>m.name)}
 function build(AD,overwrite){
-  const cx=ctxOf(AD),K=kb();if(!K)return;SLANG=CZ(AD).lang||(isEN()?"en":"ar");
+  const cx=ctxOf(AD),K=kb();if(!K)return;SLANG=CZ(AD).lang||uiLang();
   const z=picks(AD,cx),d=AD.data,set=(o,k,v)=>{if(v==null||v==="")return;if(overwrite||!o[k]||(Array.isArray(o[k])&&!o[k].length))o[k]=v};
   const J=l=>l.filter(Boolean).join(SLANG==="ar"?"، ":", ");
   const ps=(CZ(AD).ps&&CZ(AD).ps.trim())||problemStatement(AD,cx),ch=chainOf(AD,cx),pool=cmPool(AD,cx);
@@ -202,7 +205,7 @@ function build(AD,overwrite){
   const cust=custom(AD),cc=(CZ(AD).cm||[]),ev=CZ(AD).ev||{};
   const fixDone=ansText(AD,"fix",cx),parts=ansText(AD,"part",cx),checked=ansText(AD,"checked",cx),det=ansText(AD,"det",cx),who=ansText(AD,"who",cx),chg=ansText(AD,"chg",cx),act=actualText(AD,cx);
   const r=rank(AD,cx),ver=r.filter(x=>x.status==="ok"),ruled=r.filter(x=>x.status==="no"),top=r.filter(x=>x.status!=="no").slice(0,2);
-  const EVK={measured:ST("اتقاس","Measured"),seen:ST("اتشاف","Seen"),trend:ST("Trend / داتا","Trend / data"),swap:ST("swap test","Swap test")};
+  const EVK={measured:ST("اتقاس","Measured"),seen:ST("اتشاف","Seen"),trend:ST("Trend / بيانات","Trend / data"),swap:ST("swap test","Swap test")};
   const evLine=x=>{const e=ev[x.id]||{};return SL(x.c)+(e.k||e.t?" — "+[EVK[e.k]||"",e.t||""].filter(Boolean).join(": "):ST(" — (مفيش دليل مكتوب)"," — (no evidence recorded)"))};
   const facts=J([ansText(AD,"gmp_imp",cx)?ST("أثر على المنتج: ","Product: ")+ansText(AD,"gmp_imp",cx):"",ansText(AD,"qa_note",cx)?"QA: "+ansText(AD,"qa_note",cx):"",ansText(AD,"loto",cx)?"LOTO: "+ansText(AD,"loto",cx):"",ansText(AD,"saf_rep",cx)?ST("بلاغ HSE: ","HSE report: ")+ansText(AD,"saf_rep",cx):""]);
   const unv=!ch.verified,root=ch.root?(unv?ST("لسه محتاج تأكيد: ","To verify: "):"")+ch.root:"";
@@ -224,7 +227,7 @@ function build(AD,overwrite){
     set(a,"what",symL+(act?" — "+act:"")+(chg?". "+ST("بدأت بعد: ","Started after: ")+chg:""));set(a,"who",who||prof);set(a,"where",[AD.machine,cx.m.area].filter(Boolean).join(", "));set(a,"when_date",cx.date);
     set(a,"how_know",J([det,ansText(AD,"qa_note",cx)?"QA: "+ansText(AD,"qa_note",cx):""]));
     const dd=num(ans(AD,"dur").v),cc2=num(ans(AD,"cost").v),rep=ansText(AD,"rep",cx),co=num(ans(AD,"co_min").v),sp=num(ans(AD,"sp_days").v);
-    set(a,"how_much",[dd!=null?ST("توقف ","Downtime ")+fmtN(dd)+" h":"",cc2!=null?ST("تكلفة ","Cost ")+fmtN(cc2)+" EGP":"",co!=null?ST("التشينج أوفر ","Changeover ")+fmtN(co)+" min":"",sp!=null?ST("انتظار قطعة ","Waiting for part ")+fmtN(sp)+ST(" يوم"," days"):"",rep?ST("تكرار: ","Repeats: ")+rep:"",ansText(AD,"gmp_imp",cx)?ST("أثر على المنتج: ","Product impact: ")+ansText(AD,"gmp_imp",cx):""].filter(Boolean).join("; "));
+    set(a,"how_much",[dd!=null?ST("توقف ","Downtime ")+fmtN(dd)+" h":"",cc2!=null?ST("تكلفة ","Cost ")+fmtN(cc2)+" EGP":"",co!=null?ST("تغيير المنتج ","Changeover ")+fmtN(co)+" min":"",sp!=null?ST("انتظار قطعة ","Waiting for part ")+fmtN(sp)+ST(" يوم"," days"):"",rep?ST("تكرار: ","Repeats: ")+rep:"",ansText(AD,"gmp_imp",cx)?ST("أثر على المنتج: ","Product impact: ")+ansText(AD,"gmp_imp",cx):""].filter(Boolean).join("; "));
     set(a,"redefined",ps);
     const fb={materials:[],methods:[],man:[],machines:[],nature:[],measurement:[]};let gen=0;
     r.filter(x=>x.status!=="no").slice(0,10).forEach(x=>{const l=fb[x.c.fish];if(!l||l.length>=6)return;if(x.id.startsWith("o_")&&x.status!=="ok"){if(gen>=2)return;gen++}l.push(SL(x.c))});
@@ -275,7 +278,7 @@ function qCard(AD,q,cx){
   const a=ans(AD,q.id),opts=optsOf(q,cx),ids=selIds(AD,q.id);
   let body="";
   if(q.type==="number"){body=`<div class="nrow"><input type="number" inputmode="decimal" data-qn="${q.id}" value="${esc(a.v==null?"":a.v)}" placeholder="0">${q.unit?`<span class="unit">${esc(q.unit)}</span>`:""}</div>`+((q.quick||[]).length?`<div class="chips qk">${q.quick.map(n=>`<button type="button" data-qq="${q.id}|${n}" class="${String(a.v)===String(n)?"on":""}">${n}</button>`).join("")}</div>`:"")}
-  else if(q.type==="text"){body=`<div class="mf"><textarea data-qt="${q.id}" dir="auto" rows="3" placeholder="${esc(T2("اكتب أو اضغط المايك واتكلم","Type or tap the mic and speak"))}">${esc(a.t||"")}</textarea></div>`}
+  else if(q.type==="text"){body=`<div class="mf"><textarea data-qt="${q.id}" dir="auto" rows="3" placeholder="${esc(T2("اكتب أو اضغط الميكروفون واتكلم","Type or tap the mic and speak"))}">${esc(a.t||"")}</textarea></div>`}
   else{body=opts.length?`<div class="chips qo">${opts.map(o=>`<button type="button" data-qo="${q.id}|${esc(o.id)}" class="${ids.includes(o.id)?"on":""}">${esc(L(o))}</button>`).join("")}</div>`:""}
   const oth=q.type!=="text"&&(q.other!==false)?`<div class="mf oth"><input data-qt="${q.id}" dir="auto" value="${esc(a.t||"")}" placeholder="${esc(opts.length?T2("حاجة تانية / تفاصيل","Other / details"):T2("اكتب أو اتكلم","Type or speak"))}"></div>`:"";
   const done=(ids.length||(a.v!=null&&a.v!=="")||(a.t&&a.t.trim()))?" done":"";
@@ -288,8 +291,8 @@ function interviewHtml(AD){
   if(e)hdr=`<div class="hint" style="background:#E8EEFB;color:#242269">${T2("المشكلة","Problem")}: <b dir="auto">${esc(e.title)}</b> · ${esc(e.machine)} · ${esc(e.date)}</div>`;
   else{
     const cats=AD.type==="Kaizen"?"":`<label>${T2("نوع المشكلة","Problem type")}</label><div class="chips" id="cxCat">${ISSUE.map(c=>`<button type="button" data-cat="${c}" class="${AD.cat===c?"on":""}">${esc(catAr(c))}</button>`).join("")}</div>`;
-    hdr=`<label>${AD.type==="Kaizen"?T2("عنوان التحسين","Improvement title"):T2("عنوان المشكلة","Problem title")}</label><div class="mf"><input id="anTitle" dir="auto" value="${esc(AD.title)}" placeholder="${esc(AD.type==="Kaizen"?T2("مثال: تقليل وقت التشينج أوفر في بلستر خط 3","Example: cut changeover time on blister line 3"):T2("مثال: ارتفاع الرفض في فيته 3","Example: high rejects on Fette 3"))}"></div>
-    <label>${T2("الماكينة","Machine")}</label><select id="anMach"><option value="">${T2("اختار","Choose")}</option>${machines().map(m=>`<option${m.name===AD.machine?" selected":""}>${esc(m.name)}</option>`).join("")}</select>${cats}`;
+    hdr=`<label>${AD.type==="Kaizen"?T2("عنوان التحسين","Improvement title"):T2("عنوان المشكلة","Problem title")}</label><div class="mf"><input id="anTitle" dir="auto" value="${esc(AD.title)}" placeholder="${esc(AD.type==="Kaizen"?T2("مثال: تقليل وقت تغيير المنتج في بلستر خط 3","Example: cut changeover time on blister line 3"):T2("مثال: ارتفاع الرفض في فيته 3","Example: high rejects on Fette 3"))}"></div>
+    <label>${T2("الماكينة","Machine")}</label><select id="anMach"><option value="">${T2("اختار","Choose")}</option>${machines().map(m=>`<option class="noTr" value="${esc(m.name)}"${m.name===AD.machine?" selected":""}>${esc(m.name)}</option>`).join("")}</select>${cats}`;
   }
   const fl=flowOf(AD,cx).map(Q).filter(Boolean);
   const n=fl.filter(q=>{const a=ans(AD,q.id);return selIds(AD,q.id).length||(a.t&&a.t.trim())||(a.v!=null&&a.v!=="")}).length;
@@ -314,11 +317,11 @@ function bindInterview(root,AD,rerender){
 
 /* ---------- UI: coach review ---------- */
 let showAll=false;const hl=v=>v==="H"?T2("عالي","High"):T2("قليل","Low");
-function evHtml(AD,id){const e=(CZ(AD).ev||{})[id]||{},ks=[["measured",T2("اتقاس","Measured")],["seen",T2("اتشاف","Seen")],["trend",T2("Trend / داتا","Trend / data")],["swap",T2("Swap test","Swap test")]];
+function evHtml(AD,id){const e=(CZ(AD).ev||{})[id]||{},ks=[["measured",T2("اتقاس","Measured")],["seen",T2("اتشاف","Seen")],["trend",T2("Trend / بيانات","Trend / data")],["swap",T2("تجربة تبديل (Swap test)","Swap test")]];
   return `<div class="evb${e.k||e.t?"":" need"}"><div class="muted">${T2("الدليل إيه؟","What is the evidence?")}</div><div class="chips czs">${ks.map(([k,n])=>`<button type="button" data-evk="${id}|${k}" class="${e.k===k?"on":""}">${n}</button>`).join("")}</div><div class="mf"><input dir="auto" data-evt="${id}" value="${esc(e.t||"")}" placeholder="${esc(T2("مثلا: الـgap اتقاس 0.4 mm والمطلوب 0.1","e.g. gap measured 0.4 mm vs 0.1 mm required"))}"></div></div>`}
 function coachHtml(AD){
   const K=kb();if(!K)return "";
-  const cx=ctxOf(AD),z=CZ(AD);SLANG=z.lang||(isEN()?"en":"ar");picks(AD,cx);
+  const cx=ctxOf(AD),z=CZ(AD);SLANG=z.lang||uiLang();picks(AD,cx);
   const ps=z.ps&&z.ps.trim()?z.ps:problemStatement(AD,cx);
   const rules=evalRules(AD,cx),r=rank(AD,cx),pool=cmPool(AD,cx),ch=chainOf(AD,cx);
   const sevC={high:"#D9534F",med:"#E8A33D",low:"#47BFD9"};
@@ -329,7 +332,7 @@ function coachHtml(AD){
   const cmRow=id=>{const m=K.cms[id];return `<label class="ck"><input type="checkbox" data-pc="${id}"${(z.pc||[]).includes(id)?" checked":""}><span>${esc(L(m))}<small> · ${esc(T2(...KIND_LBL[m.kind]))} · ${T2("أثر","Impact")} ${hl(m.impact)} / ${T2("مجهود","Effort")} ${hl(m.effort)} · ${esc(L(m.owner))}</small></span></label>`};
   const kRow=id=>`<label class="ck"><input type="checkbox" data-pk="${id}"${(z.pk||[]).includes(id)?" checked":""}><span>${esc(L(K.kpis[id]))} <small>(${esc(K.kpis[id].unit)})</small></span></label>`;
   const chain=[ch.sym,...ch.whys].filter(Boolean);
-  const ai=AI&&AI.on?aiHtml(AD):`<div class="muted" style="margin-top:6px">${T2("لو فعّلت الوضع الأونلاين من الإعدادات، هيظهر هنا خبير ذكاء اصطناعي يراجع معاك ويسألك.","Enable online mode in Settings to get an AI expert here who reviews and asks you questions.")}</div>`;
+  const ai=AI&&AI.on?aiHtml(AD):`<div class="muted" style="margin-top:6px">${T2("لو فعّلت وضع الإنترنت من الإعدادات، هيظهر هنا خبير ذكاء اصطناعي يراجع معاك ويسألك.","Enable online mode in Settings to get an AI expert here who reviews and asks you questions.")}</div>`;
   const rec=recommend(AD,cx);
   return `<div class="cbox"><div class="ch">${T2("1. صياغة المشكلة","1. Problem statement")}</div><div class="muted">${T2("المساعد كتبها من إجاباتك. عدّل لو محتاج.","Drafted from your answers. Edit if needed.")}</div><div class="mf"><textarea id="czPs" dir="auto" rows="4">${esc(ps)}</textarea></div><button type="button" class="lnk" id="czPsR">${T2("أعد الصياغة من الإجابات","Redraft from answers")}</button></div>
   <div class="cbox"><div class="ch">${T2("2. مراجعة المساعد","2. Coach review")} <small>${AD.type}${AD.type!=="Kaizen"?" · "+T2("المقترح: ","suggested: ")+rec.tool:""}</small></div>${rc}</div>
@@ -339,9 +342,9 @@ function coachHtml(AD){
   <div class="cbox"><div class="ch">${T2("5. الحلول","5. Actions")}</div>${pool.cont.length?`<div class="sub2">${T2("احتواء (مؤقت)","Containment (temporary)")}</div>${pool.cont.map(cmRow).join("")}`:""}${pool.perm.length?`<div class="sub2">${T2("حل دائم (الأقوى الأول)","Permanent (strongest first)")}</div>${pool.perm.map(cmRow).join("")}`:""}
   ${(z.cm||[]).map((t,i)=>`<div class="ck"><span dir="auto">${esc(t)}</span> <button type="button" class="lnk" data-cmdel="${i}">${T2("مسح","Remove")}</button></div>`).join("")}<div class="addc"><div class="mf"><input id="cmNew" dir="auto" placeholder="${esc(T2("حل تاني (اكتب أو اتكلم)","Another action (type or speak)"))}"></div><button type="button" class="btn ghost" id="cmAdd">${T2("إضافة","Add")}</button></div>
   ${pool.kp.length?`<div class="sub2">${T2("مؤشرات المتابعة","KPIs to follow")}</div>${pool.kp.map(kRow).join("")}`:""}</div>
-  <div class="cbox"><div class="ch">${T2("6. لغة الشيت","6. Sheet language")}</div><div class="chips"><button type="button" data-sl="en" class="${SLANG==="en"?"on":""}">English</button><button type="button" data-sl="ar" class="${SLANG==="ar"?"on":""}">عربي</button></div></div>
+  <div class="cbox"><div class="ch">${T2("6. لغة النموذج","6. Sheet language")}</div><div class="chips"><button type="button" data-sl="en" class="${SLANG==="en"?"on":""}">English</button><button type="button" data-sl="ar" class="${SLANG==="ar"?"on":""}">عربي</button><button type="button" data-sl="fr" class="${SLANG==="fr"?"on":""}">Français</button></div></div>
   <div class="cbox"><div class="ch">${T2("خبير الذكاء الاصطناعي","AI expert")}</div>${ai}</div>
-  <div class="muted" style="margin-top:6px">${T2("زرار \"ارسم الشيت وكمّل\" تحت بيملا الخانات الفاضية بس. لو عايز يكتب فوق اللي موجود: ","\"Build sheet and continue\" below fills empty fields only. To overwrite existing text: ")}<button type="button" class="lnk" id="czRebuild">${T2("أعد الكتابة","Rewrite all")}</button></div>`;
+  <div class="muted" style="margin-top:6px">${T2("زرار \"ارسم النموذج وكمّل\" تحت بيملا الخانات الفاضية بس. لو عايز يكتب فوق اللي موجود: ","\"Build sheet and continue\" below fills empty fields only. To overwrite existing text: ")}<button type="button" class="lnk" id="czRebuild">${T2("أعد الكتابة","Rewrite all")}</button></div>`;
 }
 function bindCoach(root,AD,rerender,onSwitch,onBuilt){
   const z=CZ(AD),cx=ctxOf(AD);
@@ -377,7 +380,7 @@ function aiHtml(AD){
     if(r.recommended_tool&&r.recommended_tool!==AD.type)h+=`<div class="rule" style="border-inline-start-color:#E8A33D"><div dir="auto">${esc(T2("الخبير شايف الأداة المناسبة: ","Expert recommends: ")+r.recommended_tool+". "+(r.tool_reason||""))}</div><button type="button" class="btn ghost" data-sw="${esc(r.recommended_tool)}">${T2("حوّل لـ","Switch to ")}${esc(r.recommended_tool)}</button></div>`;
     (r.challenges||[]).forEach(c=>{h+=`<div class="rule" style="border-inline-start-color:#D9534F"><div dir="auto"><b>${esc(c.issue||"")}</b> ${esc(c.why||"")}</div><div class="rfix" dir="auto">${esc(c.fix||"")}</div></div>`});
     if((r.questions||[]).length){h+=`<div class="ch2">${T2("الخبير بيسألك","The expert asks you")}</div>`;(r.questions||[]).forEach((q,i)=>{h+=`<label dir="auto">${esc(q)}</label><div class="mf"><input dir="auto" data-aiq="${i}" value="${esc(((z.aiqa||[])[i]||{}).a||"")}" placeholder="${esc(T2("جاوب أو اتكلم","Answer or speak"))}"></div>`})}
-    h+=`<button type="button" class="btn main block" id="aiUse" style="margin-top:10px">${T2("استخدم مسودة الخبير في الشيت","Use the expert's draft in the sheet")}</button></div>`;
+    h+=`<button type="button" class="btn main block" id="aiUse" style="margin-top:10px">${T2("استخدم مسودة الخبير في النموذج","Use the expert's draft in the sheet")}</button></div>`;
   }
   return h;
 }
@@ -385,14 +388,14 @@ function bindAi(root,AD,rerender,onBuilt){
   const z=CZ(AD);
   root.querySelectorAll("[data-aiq]").forEach(el=>el.oninput=()=>{const r=z.ai||{},i=+el.dataset.aiq;z.aiqa=z.aiqa||[];z.aiqa[i]={q:(r.questions||[])[i]||"",a:el.value}});
   const b=root.querySelector("#aiAsk");if(b)b.onclick=async()=>{b.disabled=true;b.textContent=T2("الخبير بيفكر...","The expert is thinking...");try{z.ai=await aiCoach(AD);z.aiHist=(z.aiHist||[]).concat((z.aiqa||[]).filter(x=>x&&x.a)).slice(-12);z.aiqa=[];rerender()}catch(e){console.error(e);toast(T2("الذكاء الاصطناعي مش متاح دلوقتي. كمّل بالمساعد العادي","AI is not available now. Continue with the offline coach"));b.disabled=false;b.textContent=T2("اسأل خبير الذكاء الاصطناعي","Ask the AI expert")}};
-  const u=root.querySelector("#aiUse");if(u)u.onclick=()=>{if(!confirm(T2("هيكتب مسودة الخبير في خانات الشيت (فوق اللي موجود). تمام؟","This writes the expert's draft into the sheet fields (overwriting). OK?")))return;applyAi(AD);onBuilt()};
+  const u=root.querySelector("#aiUse");if(u)u.onclick=()=>{if(!confirm(T2("هيكتب مسودة الخبير في خانات النموذج (فوق اللي موجود). تمام؟","This writes the expert's draft into the sheet fields (overwriting). OK?")))return;applyAi(AD);onBuilt()};
 }
 async function aiCoach(AD){
-  const cx=ctxOf(AD),z=CZ(AD),K=kb();SLANG=z.lang||(isEN()?"en":"ar");
+  const cx=ctxOf(AD),z=CZ(AD),K=kb();SLANG=z.lang||uiLang();
   const answers={};for(const id of Object.keys(IV(AD))){const q=Q(id);if(!q)continue;const t=ansText(AD,id,cx);if(t)answers[q.en||id]=t}
   const top=rank(AD,cx).slice(0,8).map(x=>({cause:x.c.en,status:x.status==="ok"?"confirmed":x.status==="no"?"ruled out":"not checked",check:x.c.check.en}));
   const kz=AD.type==="Kaizen"?',"kaizen":{"before":"","target":"","improvement":"","after_expected":"","results":[{"kpi":"","unit":"","before":"","after":""}],"std":["sop|opl|pm|training|visual"],"horizontal":""}':"";
-  const sys=`You are two experts reviewing a shop-floor problem together: (1) a senior pharmaceutical maintenance & reliability engineer (oral solid dose, GMP, TPM) and (2) an Operational Excellence coach (Lean, TPM focused improvement, A3/3C/Kaizen). The site is Servier Egypt, Cairo. Help the engineer think, do not just reformat. Rules: use only the facts given; never invent numbers (write [to measure] instead); challenge weak thinking (no standard, no numbers, person blamed, cause not verified, weak countermeasure, wrong tool, GMP product impact, safety LOTO/hierarchy of controls); 5 whys must be a causal chain ending in a SYSTEM cause, never a person; countermeasures address the root cause, strongest kind first (eliminate, design, poka_yoke, pm, standard, inspection, training). Ask at most 4 short questions that would change the conclusion. Write "assessment", "tool_reason", "challenges" and "questions" in ${isEN()?"clear plant English":"Egyptian Arabic (English technical terms allowed)"}. Write every other field (sheet content) in ${SLANG==="ar"?"Egyptian Arabic (English technical terms allowed)":"clear plant English"}. Reply with JSON only: {"assessment":"","recommended_tool":"3C|A3|Kaizen","tool_reason":"","challenges":[{"issue":"","why":"","fix":""}],"questions":[""],"problem_statement":"","causes":[{"cause":"","fish":"materials|methods|man|machines|nature|measurement","check":"","likelihood":"high|medium|low"}],"whys":["","","","",""],"root_cause":"","containment":[""],"countermeasures":[{"text":"","kind":"","impact":"H|L","effort":"H|L","owner":""}],"kpis":[{"name":"","baseline":"","goal":""}]${kz}}`;
+  const sys=`You are two experts reviewing a shop-floor problem together: (1) a senior pharmaceutical maintenance & reliability engineer (oral solid dose, GMP, TPM) and (2) an Operational Excellence coach (Lean, TPM focused improvement, A3/3C/Kaizen). The site is Servier Egypt, Cairo. Help the engineer think, do not just reformat. Rules: use only the facts given; never invent numbers (write [to measure] instead); challenge weak thinking (no standard, no numbers, person blamed, cause not verified, weak countermeasure, wrong tool, GMP product impact, safety LOTO/hierarchy of controls); 5 whys must be a causal chain ending in a SYSTEM cause, never a person; countermeasures address the root cause, strongest kind first (eliminate, design, poka_yoke, pm, standard, inspection, training). Ask at most 4 short questions that would change the conclusion. Write "assessment", "tool_reason", "challenges" and "questions" in ${{fr:"clear plant French",en:"clear plant English",ar:"Egyptian Arabic (English technical terms allowed)"}[uiLang()]}. Write every other field (sheet content) in ${{fr:"clear plant French",en:"clear plant English",ar:"Egyptian Arabic (English technical terms allowed)"}[SLANG]}. Reply with JSON only: {"assessment":"","recommended_tool":"3C|A3|Kaizen","tool_reason":"","challenges":[{"issue":"","why":"","fix":""}],"questions":[""],"problem_statement":"","causes":[{"cause":"","fish":"materials|methods|man|machines|nature|measurement","check":"","likelihood":"high|medium|low"}],"whys":["","","","",""],"root_cause":"","containment":[""],"countermeasures":[{"text":"","kind":"","impact":"H|L","effort":"H|L","owner":""}],"kpis":[{"name":"","baseline":"","goal":""}]${kz}}`;
   const user={tool:AD.type,category:cx.cat,machine:AD.machine,machine_area:cx.m.area,date:AD.date,title:AD.title,problem_statement_draft:(z.ps&&z.ps.trim())||problemStatement(AD,cx),answers,offline_engine_causes:top,engineer_own_causes:custom(AD).map(x=>({cause:x.text,status:x.st==="ok"?"confirmed":"not checked"})),engineer_answers_to_your_previous_questions:(z.aiHist||[]).concat((z.aiqa||[]).filter(x=>x&&x.a))};
   const r=await fetch("https://api.openai.com/v1/chat/completions",{method:"POST",headers:{Authorization:"Bearer "+AI.cfg.key,"Content-Type":"application/json"},body:JSON.stringify({model:AI.cfg.model||"gpt-4o-mini",temperature:0.2,response_format:{type:"json_object"},messages:[{role:"system",content:sys},{role:"user",content:JSON.stringify(user)}]})});
   if(!r.ok)throw new Error("http "+r.status);
@@ -447,7 +450,7 @@ function triageHtml(tr){
 const SRc=window.SpeechRecognition||window.webkitSpeechRecognition,IOSd=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
 const D={el:null,btn:null,r:null,want:false,base:"",n:0,mr:null};
 function dStop(){D.want=false;try{D.r&&D.r.stop()}catch(e){}try{if(D.mr&&D.mr.state==="recording")D.mr.stop()}catch(e){}if(D.btn)D.btn.classList.remove("rec");}
-function put(el,txt){el.value=txt;el.dispatchEvent(new Event("input",{bubbles:true}))}
+function put(el,txt){if(!el.isConnected){dStop();return}el.value=txt;el.dispatchEvent(new Event("input",{bubbles:true}))}
 function dStartSR(){
   const r=new SRc();D.r=r;const sel=document.getElementById("lang");r.lang=sel?sel.value:"ar-EG";r.interimResults=true;r.continuous=!IOSd;
   const el=D.el,base=D.base;
@@ -462,10 +465,10 @@ async function dStart(el,btn){
   if(AI&&AI.on&&navigator.onLine&&navigator.mediaDevices&&window.MediaRecorder&&typeof whisper==="function"){
     try{const stream=await navigator.mediaDevices.getUserMedia({audio:true}),mime=MediaRecorder.isTypeSupported("audio/mp4")?"audio/mp4":MediaRecorder.isTypeSupported("audio/webm")?"audio/webm":"";
       const mr=D.mr=new MediaRecorder(stream,mime?{mimeType:mime}:undefined),ch=[];mr.ondataavailable=e=>{if(e.data&&e.data.size)ch.push(e.data)};
-      const base0=D.base;mr.onstop=async()=>{stream.getTracks().forEach(t=>t.stop());btn.classList.remove("rec");btn.classList.add("busy");try{const t=await whisper(new Blob(ch,{type:mr.mimeType||"audio/webm"}));if(t)put(el,((el.value.trim()?el.value.trim()+" ":base0)+t).trim())}catch(e){toast(T2("التحويل أونلاين فشل. جرب تاني","Online transcription failed. Try again"))}btn.classList.remove("busy")};
+      const base0=D.base;mr.onstop=async()=>{stream.getTracks().forEach(t=>t.stop());btn.classList.remove("rec");btn.classList.add("busy");try{const t=await whisper(new Blob(ch,{type:mr.mimeType||"audio/webm"}));if(t)put(el,((el.value.trim()?el.value.trim()+" ":base0)+t).trim())}catch(e){toast(T2("التحويل عبر الإنترنت فشل. جرب تاني","Online transcription failed. Try again"))}btn.classList.remove("busy")};
       mr.start();return}catch(e){}
   }
-  if(!SRc){dStop();toast(T2("المتصفح مش بيدعم الصوت. استخدم مايك الكيبورد","Browser has no voice support. Use the keyboard mic"));el.focus();return}
+  if(!SRc){dStop();toast(T2("المتصفح مش بيدعم الصوت. استخدم ميكروفون لوحة المفاتيح","Browser has no voice support. Use the keyboard mic"));el.focus();return}
   try{dStartSR()}catch(e){dStop();toast(T2("مقدرتش أشغل الميكروفون","Could not start the microphone"))}
 }
 const MIC_SVG='<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>';

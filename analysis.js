@@ -7,25 +7,25 @@ const ISSUE_CATS=["Breakdown Fixed","Safety","GMP / Quality","Energy & Utilities
 const isIssue=e=>!!e&&ISSUE_CATS.includes(e.category);
 const suggestType=e=>e&&/Kaizen|Cost Saving/.test(e.category)?"Kaizen":((+e.dt||0)>=4||(+e.sav||0)>=20000)?"A3":"3C";
 const KZ_CATS=["Kaizen / Improvement","Cost Saving"];
-const T2=(ar,en)=>isEN()?en:ar;
+const T2=(ar,en)=>isEN()?(window.I18N&&I18N.isFR()?I18N.fr(en):en):ar;
 const TYPES=["3C","A3","Kaizen"],TCOL={"3C":"#47BFD9",A3:"#F55B41",Kaizen:"#91C361"};
 const KZ_KIND={quick:"Quick Kaizen",event:"Kaizen Event",standard:"Standard Kaizen"};
 const KZ_STD=[["sop","SOP updated"],["opl","OPL / one-point lesson"],["pm","PM checklist updated"],["training","Team trained"],["visual","Visual control"]];
 const A3_IMPACT=[["Q","جودة"],["C","تكلفة"],["D","تسليم"],["S","سلامة"],["CSR","CSR"],["E","بيئة"]];
 const FISH=[["materials","MATERIALS","خامات"],["methods","METHODS (PROCESSES)","طرق"],["man","MAN (PEOPLE)","ناس"],["machines","MACHINES (EQUIPMENT)","ماكينات"],["nature","MOTHER NATURE (ENV.)","بيئة"],["measurement","MEASUREMENTS","قياس"]];
 const TYPICAL={
- materials:["جودة الخامة أو المواصفات","باتش أو مورد مختلف","قطعة غيار مش أصلية","تأخر توريد القطعة"],
- methods:["مفيش SOP أو مش واضح","خطوات الضبط مش متتبعة","تشينج أوفر بدون checklist","الـPM مش بيغطي النقطة دي"],
+ materials:["جودة الخامة أو المواصفات","تشغيلة أو مورد مختلف","قطعة غيار مش أصلية","تأخر توريد القطعة"],
+ methods:["مفيش SOP أو مش واضح","خطوات الضبط مش متتبعة","تغيير منتج من غير checklist","الـPM مش بيغطي النقطة دي"],
  man:["تدريب غير كافي","اختلاف بين الورديات","ضغط وقت","المسؤولية مش واضحة"],
  machines:["تآكل","نقص تزييت","ضبط غير صحيح","اهتزاز أو خلوص","سخان أو حساس متدهور"],
  nature:["حرارة أو رطوبة","تراب أو تلوث","تذبذب كهرباء","ضغط هواء أو بخار غير ثابت"],
  measurement:["معايرة منتهية","حساس مش دقيق","مفيش مؤشر يكشف بدري","طريقة قياس مختلفة"]
 };
-const STD_Q=["std","إيه المفروض يكون عليه الوضع؟ (المعيار أو المتوقع)","مثال: الخط يشتغل 40 بلستر/دقيقة من غير توقف"];
+const STD_Q=["std","إيه المفروض يكون عليه الوضع؟ (المعيار أو المتوقع)","مثال: الخط يشتغل 40 شريط/دقيقة من غير توقف"];
 const QSETS={
  "Breakdown Fixed":[STD_Q,["dur","العطل وقّف الماكينة قد إيه؟ (ساعات)","مثال: 3"],["rep","ده اتكرر قبل كده؟ كام مرة في آخر 3 شهور؟","مثال: 4 مرات"],["chg","إيه اللي اتغير قبل العطل؟ (قطعة، منتج، صيانة، وردية، ضبط)",""],["sym","إيه العرض أو الإنذار اللي ظهر؟ وإزاي عرفت؟",""],["fix","اتصلّح إزاي دلوقتي؟ وإيه القطعة اللي اتغيرت؟",""],["cost","التكلفة التقريبية (قطع وإنتاج ضايع) بالجنيه؟","مثال: 12000"]],
- "Changeover":[["std","الوقت المعياري للتشينج أوفر؟ (ساعات)","مثال: 3"],["dur","الوقت الفعلي؟ (ساعات)","مثال: 5"],["late","إيه اللي اتأخر؟ (أجزاء ناقصة، تنضيف، فحص جودة، ضبط)",""],["rep","ده بيتكرر في كل تشينج أوفر؟","مثال: آخر 3 مرات"],["fix","عملتوا إيه عشان تلحقوا؟",""],["cost","الخسارة التقريبية بالجنيه؟","مثال: 8000"]],
- "GMP / Quality":[STD_Q,["dev","إيه الانحراف بالظبط؟ وكام % أو كام وحدة خارج المعيار؟",""],["lot","المنتج والباتش؟",""],["rep","ظهر قبل كده؟ كام مرة؟",""],["chg","إيه اللي اتغير قبل ما يظهر؟",""],["fix","اتعمل إيه فوراً؟ (حجز، فحص، إعادة)",""],["cost","التكلفة أو الكمية المرفوضة؟",""]],
+ "Changeover":[["std","الوقت المعياري لتغيير المنتج؟ (ساعات)","مثال: 3"],["dur","الوقت الفعلي؟ (ساعات)","مثال: 5"],["late","إيه اللي اتأخر؟ (أجزاء ناقصة، تنضيف، فحص جودة، ضبط)",""],["rep","ده بيتكرر في كل تغيير منتج؟","مثال: آخر 3 مرات"],["fix","عملتوا إيه عشان تلحقوا؟",""],["cost","الخسارة التقريبية بالجنيه؟","مثال: 8000"]],
+ "GMP / Quality":[STD_Q,["dev","إيه الانحراف بالظبط؟ وكام % أو كام وحدة خارج المعيار؟",""],["lot","المنتج ورقم التشغيلة (Batch)؟",""],["rep","ظهر قبل كده؟ كام مرة؟",""],["chg","إيه اللي اتغير قبل ما يظهر؟",""],["fix","اتعمل إيه فوراً؟ (حجز، فحص، إعادة)",""],["cost","التكلفة أو الكمية المرفوضة؟",""]],
  "Safety":[["std","إيه إجراء الأمان المفروض يتتبع؟","مثال: LOTO قبل أي تدخل"],["inj","كان فيه إصابة أو قرب إصابة؟ إيه الخطر؟",""],["bar","إيه حاجز الحماية اللي فشل أو ما كانش موجود؟",""],["rep","شفته قبل كده؟",""],["fix","اتعمل إيه فوراً؟",""]],
  "Energy & Utilities":[["std","الاستهلاك الطبيعي؟","مثال: 120 kWh لكل ساعة"],["dur","الاستهلاك الفعلي، ومن إمتى؟",""],["loc","فين التسريب أو الهدر؟",""],["fix","اتعمل إيه مؤقتاً؟",""],["cost","التكلفة التقريبية في الشهر؟","مثال: 15000"]],
  "Spare Parts Needed":[["part","القطعة وكودها وعددها؟",""],["stock","المتاح في المخزن؟ ومدة التوريد؟",""],["imp","لو القطعة مش موجودة إيه اللي هيقف؟",""],["rep","القطعة دي خلصت قبل كده؟",""],["fix","بديل مؤقت؟",""],["cost","سعر القطعة وتكلفة التوقف؟",""]],
@@ -102,7 +102,7 @@ function stepsOf(){
    [()=>"2. Cause",stepCause],[()=>"3A. Containment",()=>fieldsStep([["c3.containment",T2("حل مؤقت يوقف الأعراض دلوقتي. هل بيمنع المشكلة تنتشر؟","Temporary fix for the symptom. Does it stop the problem spreading?"),"ta",6]])],
    [()=>"3B. Countermeasure",()=>fieldsStep([["c3.countermeasure",T2("حل دائم يشيل السبب الجذري. كل إجراء ومين هيعمله وإمتى","Permanent fix for the root cause: each action, who and when"),"ta",7]])],
    [()=>T2("ملاحظات وتأكيد","Observations and sign-off"),()=>fieldsStep([["c3.observations",T2("فحوصات اتعملت، ملاحظات، معلومات جديدة","Checks done, observations, new insights"),"ta",4],["c3.initials",T2("الحروف الأولى","Initials"),"in"],["c3.date",T2("التاريخ","Date"),"date"]])]];
-  if(AD.type==="Kaizen")return[IVW,COA,[()=>T2("بيانات الكايزن","Kaizen details"),stepKzHead],[()=>T2("1-2. الوضع الحالي والهدف","1-2. Before and target"),()=>fieldsStep([["kz.before",T2("الوضع الحالي بالأرقام (Before)","Current situation with numbers (Before)"),"ta",6],["kz.target",T2("الهدف بالأرقام","Target with numbers"),"ta",3]])],
+  if(AD.type==="Kaizen")return[IVW,COA,[()=>T2("بيانات الـKaizen","Kaizen details"),stepKzHead],[()=>T2("1-2. الوضع الحالي والهدف","1-2. Before and target"),()=>fieldsStep([["kz.before",T2("الوضع الحالي بالأرقام (Before)","Current situation with numbers (Before)"),"ta",6],["kz.target",T2("الهدف بالأرقام","Target with numbers"),"ta",3]])],
    [()=>T2("3. السبب الجذري (ليه-ليه)","3. Root cause (why-why)"),()=>[0,1,2,3].map(i=>`<label>Why ${i+1}?</label><input data-p="kz.whys.${i}" dir="auto" value="${val("kz.whys."+i)}">`).join("")+fieldsStep([["kz.root_cause","Root cause","ta",2]])],
    [()=>T2("4-5. التحسين والوضع بعده","4-5. Improvement and after"),()=>fieldsStep([["kz.improvement",T2("التحسين اللي اتعمل وإزاي","What was changed and how"),"ta",6],["kz.after",T2("الوضع بعد التحسين بالأرقام","Situation after, with numbers"),"ta",4]])],
    [()=>T2("6. النتائج","6. Results"),stepKzRes],[()=>T2("7-8. التثبيت والتوقيع","7-8. Standardize and sign-off"),stepKzStd]];
@@ -110,7 +110,7 @@ function stepsOf(){
 }
 function stepIv(){return window.COACH?COACH.interviewHtml(AD):'<div class="hint">coach.js missing</div>'}
 function stepCoach(){if(AD.qa&&Object.keys(AD.qa).length&&!Object.keys(AD.iv||{}).length)seedFromQA();return window.COACH?COACH.coachHtml(AD):""}
-function switchTool(t){if(!TYPES.includes(t)||t===AD.type)return;const filled=JSON.stringify(AD.data).replace(/"(date|opened|start|kind)":"[^"]*"/g,"").match(/"[^"]{3,}"(?=[,}\]])/g);if(filled&&filled.length>6&&!confirm(T2("الشيت فيه كلام. التحويل هيبدأ شيت جديد بنفس الإجابات. تمام؟","The sheet has content. Switching starts a new sheet from the same answers. OK?")))return;
+function switchTool(t){if(!TYPES.includes(t)||t===AD.type)return;const filled=JSON.stringify(AD.data).replace(/"(date|opened|start|kind)":"[^"]*"/g,"").match(/"[^"]{3,}"(?=[,}\]])/g);if(filled&&filled.length>6&&!confirm(T2("النموذج فيه كلام. التحويل هيبدأ نموذج جديد بنفس الإجابات. تمام؟","The sheet has content. Switching starts a new sheet from the same answers. OK?")))return;
   AD.type=t;AD.data=blankData(t);const p=S.profile||{};if(t==="3C")AD.data.c3.initials=initials(p.name);else if(t==="A3")AD.data.a3.originator=p.name||"";else AD.data.kz.leader=p.name||"";delete AD.cz.pc;delete AD.cz.pk;anSave();anStep=0;renderStep();toast(T2("اتحوّل لـ","Switched to ")+t+T2(". كمّل الأسئلة",". Complete the questions"))}
 function renderStep(){
   if(window.COACH)COACH.stopMic();
@@ -122,10 +122,10 @@ function renderStep(){
   $("#anBody").innerHTML=st[anStep][1]();bindBody();
   const rr=()=>{renderStep()};
   if(anStep===0&&window.COACH)COACH.bindInterview($("#anBody"),AD,rr);
-  else if(anStep===1&&window.COACH)COACH.bindCoach($("#anBody"),AD,rr,switchTool,()=>{anSave();anStep=2;renderStep();toast(T2("الشيت اتملى. راجع كل خطوة وعدّل","Sheet filled. Review each step and edit"))});
+  else if(anStep===1&&window.COACH)COACH.bindCoach($("#anBody"),AD,rr,switchTool,()=>{anSave();anStep=2;renderStep();toast(T2("النموذج اتملى. راجع كل خطوة وعدّل","Sheet filled. Review each step and edit"))});
   else if(window.COACH)COACH.addMics($("#anBody"));
   $("#anBack").style.visibility=anStep?"visible":"hidden";
-  $("#anNext").textContent=anStep===st.length-1?T2("خلّص وشوف الشيت","Finish and view the sheet"):anStep===1?T2("ارسم الشيت وكمّل","Build sheet and continue"):T2("التالي","Next");
+  $("#anNext").textContent=anStep===st.length-1?T2("خلّص وشوف النموذج","Finish and view the sheet"):anStep===1?T2("ارسم النموذج وكمّل","Build sheet and continue"):T2("التالي","Next");
   $("#anBody").scrollTop=same?keep:0;
 }
 function bindBody(){
@@ -176,8 +176,8 @@ function stepKzHead(){const k=AD.data.kz;
   const imp=A3_IMPACT.map(([x,n])=>`<button type="button" data-kzi="${x}" class="${k.impact.includes(x)?"on":""}">${x} <small>${n}</small></button>`).join("");
   const losses=((window.KB_OPEX||{}).kaizen||{}).losses||[];
   const ls=losses.map(o=>{const t=o.en;return `<button type="button" data-kzl="${esc(t)}" class="${k.loss.includes(t)||k.loss.includes(o.ar)?"on":""}">${esc(isEN()?o.en:o.ar)}</button>`}).join("");
-  return fieldsStep([["kz.no","Kaizen No.","in"],["kz.title",T2("العنوان","Title"),"in"],["kz.area",T2("المنطقة","Area"),"in"],["kz.machine",T2("الماكينة","Machine"),"in"],["kz.leader",T2("قائد الكايزن","Leader"),"in"],["kz.team",T2("الفريق","Team"),"in"],["kz.start",T2("البداية","Start date"),"date"],["kz.end",T2("النهاية","End date"),"date"]])
-   +`<label>${T2("نوع الكايزن","Kaizen type")}</label><div class="chips">${kinds}</div><label>${T2("نوع الهدر / الفاقد","Loss / waste type")}</label><div class="chips">${ls}</div><label>6D impact</label><div class="chips">${imp}</div>`}
+  return fieldsStep([["kz.no","Kaizen No.","in"],["kz.title",T2("العنوان","Title"),"in"],["kz.area",T2("المنطقة","Area"),"in"],["kz.machine",T2("الماكينة","Machine"),"in"],["kz.leader",T2("قائد الـKaizen","Leader"),"in"],["kz.team",T2("الفريق","Team"),"in"],["kz.start",T2("البداية","Start date"),"date"],["kz.end",T2("النهاية","End date"),"date"]])
+   +`<label>${T2("نوع الـKaizen","Kaizen type")}</label><div class="chips">${kinds}</div><label>${T2("نوع الهدر / الفاقد","Loss / waste type")}</label><div class="chips">${ls}</div><label>6D impact</label><div class="chips">${imp}</div>`}
 function stepKzRes(){const k=AD.data.kz;
   return `<div class="muted" style="margin-bottom:6px">${T2("قيس قبل وبعد بنفس الطريقة.","Measure before and after the same way.")}</div>`+k.results.map((x,i)=>`<div class="rowbox"><b>${i+1}</b><input data-p="kz.results.${i}.kpi" dir="auto" placeholder="KPI" value="${esc(x.kpi)}"><div class="row3"><input data-p="kz.results.${i}.unit" dir="auto" placeholder="Unit" value="${esc(x.unit)}"><input data-p="kz.results.${i}.before" dir="auto" placeholder="Before" value="${esc(x.before)}"><input data-p="kz.results.${i}.after" dir="auto" placeholder="After" value="${esc(x.after)}"></div></div>`).join("")
    +fieldsStep([["kz.benefit_egp",T2("التوفير في السنة (جنيه)","Yearly saving (EGP)"),"in"],["kz.benefit_h",T2("ساعات اتوفرت في السنة","Hours saved / year"),"in"],["kz.intangible",T2("فوايد مش بالأرقام","Intangible benefits"),"ta",2]])}
@@ -297,7 +297,7 @@ $("#anVPrint").onclick=()=>{const z=$("#anSheet").style.zoom;$("#anSheet").style
 $("#anVEdit").onclick=()=>{$("#anView").classList.remove("show");openWizard(VA,AD&&AD.id===VA.id&&anStep>1?anStep:2)};
 $("#anVDel").onclick=()=>{if(!confirm(tr("تمسح التحليل ده؟")))return;S.analyses=ANS().filter(x=>x.id!==VA.id);save();$("#anView").classList.remove("show");renderAn();toast("اتمسح")};
 $("#anVCopy").onclick=()=>{const c=JSON.parse(JSON.stringify(VA));delete c.example;c.id=uid();c.entryId=null;c.status="draft";c.note=undefined;c.title=VA.title+" (copy)";const k=cleanAnalysis(c);if(!k)return toast("تعذّر النسخ");AD=k;anSave();$("#anView").classList.remove("show");openWizard(AD,2);toast("اتنسخ لتحليلاتي. عدّل عليه")};
-$("#anVXlsx").onclick=async()=>{try{toast("بجهز الإكسل...");const b=await exportAnalysisXlsx(VA);await shareBlob(b,`${VA.type}_${(VA.title||"analysis").replace(/[^\w؀-ۿ]+/g,"_").slice(0,30)}_${today()}.xlsx`,"تحليل "+VA.type)}catch(e){console.error(e);toast("الإكسل ماطلعش. ممكن تعمل طباعة PDF بدله")}};
+$("#anVXlsx").onclick=async()=>{try{toast("بجهّز ملف Excel...");const b=await exportAnalysisXlsx(VA);await shareBlob(b,`${VA.type}_${(VA.title||"analysis").replace(/[^\w؀-ۿ]+/g,"_").slice(0,30)}_${today()}.xlsx`,"تحليل "+VA.type)}catch(e){console.error(e);toast("ملف Excel ماطلعش. ممكن تعمل طباعة PDF بدله")}};
 
 /* ---------- Excel export: patch the ORIGINAL Servier templates ---------- */
 const b64u8=b=>Uint8Array.from(atob(b),c=>c.charCodeAt(0));
@@ -433,7 +433,7 @@ async function exportAnalysisXlsx(A){
 
 /* ---------- list tab ---------- */
 function anCard(a){
-  return `<div class="item" data-an="${esc(a.id)}" style="border-inline-start-color:${TCOL[a.type]||"#F55B41"}"><div class="top"><span>${esc(a.date||"")}</span><span><b>${a.type}</b>${a.example?" · مثال":""}${a.status==="draft"?" · مسودة":""}</span></div><div class="ti" dir="auto">${esc((!isEN()&&a.title_ar)||a.title||a.title_ar||"")}</div><div><span class="chip">${esc(a.machine||"")}</span>${a.title_ar&&!isEN()?`<span class="chip" style="background:#eee" dir="auto">${esc(a.title||"")}</span>`:""}</div></div>`;
+  return `<div class="item" data-an="${esc(a.id)}" style="border-inline-start-color:${TCOL[a.type]||"#F55B41"}"><div class="top"><span>${esc(a.date||"")}</span><span><b>${a.type}</b>${a.example?" · مثال":""}${a.status==="draft"?" · مسودة":""}</span></div><div class="ti" dir="auto">${esc((!isEN()&&a.title_ar)||(window.I18N&&I18N.isFR()?I18N.fr(a.title||""):a.title)||a.title_ar||"")}</div><div><span class="chip">${esc(a.machine||"")}</span></div></div>`;
 }
 function renderAn(){
   const mine=ANS().slice().sort((x,y)=>String(y.updated).localeCompare(String(x.updated)));
@@ -448,7 +448,7 @@ function renderAn(){
 let TRI={};
 function chooseType(entry){
   const sug=entry?suggestType(entry):(Object.keys(TRI).length&&window.COACH?COACH.triageRec(TRI):"");
-  const desc={"3C":T2("مشكلة صغيرة أو عطل بسيط. كارت واحد: مشكلة، سبب، احتواء، حل دائم. حوالي 10 دقايق.","Small problem or simple fault. One card: concern, cause, containment, countermeasure. About 10 minutes."),
+  const desc={"3C":T2("مشكلة صغيرة أو عطل بسيط. بطاقة واحدة: مشكلة، سبب، احتواء، حل دائم. حوالي 10 دقايق.","Small problem or simple fault. One card: concern, cause, containment, countermeasure. About 10 minutes."),
     A3:T2("مشكلة كبيرة أو متكررة أو مكلفة. تحليل كامل مع الفريق: 4W2H، Fishbone، 5 Whys، خطة، قياس.","Big, recurring or costly problem. Full team analysis: 4W2H, fishbone, 5 whys, plan, measurement."),
     Kaizen:T2("فكرة تحسين أو تحسين اتعمل: تقليل هدر، وقت، طاقة، مجهود. قبل وبعد بالأرقام وتثبيت.","An improvement idea or a done improvement: less waste, time, energy, effort. Before/after numbers and standardization.")};
   $("#anChooseBody").innerHTML=(entry?`<div class="hint" style="background:#E8EEFB;color:#242269" dir="auto">${esc(entry.title)} · ${esc(entry.machine)}</div>`:"")
