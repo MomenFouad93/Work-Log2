@@ -100,6 +100,34 @@ input[type=range]{padding:0;min-height:36px}
 
 .diag{white-space:pre-wrap;word-break:break-all;direction:ltr;text-align:left;font:12px/1.5 ui-monospace,Menlo,monospace;background:var(--pri2);border-radius:12px;padding:10px;margin:8px 0}
 .diag:empty{display:none}
+
+#vc{position:fixed;inset:0;background:var(--bg);z-index:45;display:flex;flex-direction:column;padding:14px;padding-top:calc(14px + env(safe-area-inset-top));padding-bottom:calc(14px + env(safe-area-inset-bottom));overflow:auto}
+#vc[hidden]{display:none}
+#vc .dtop{display:flex;align-items:center;gap:8px}
+#vc-t{flex:1;font-weight:700;font-size:16px;line-height:1.6}
+#vc .body{flex:1;display:flex;flex-direction:column;gap:14px;justify-content:center;text-align:center}
+#vc-n{font-size:64px;font-weight:800;color:var(--pri);font-variant-numeric:tabular-nums}
+#vc-n.flash{animation:vcf .35s ease}
+#vc-n.fin{color:#2e9d6a}
+@keyframes vcf{0%{transform:scale(1.25)}100%{transform:scale(1)}}
+#vc-lvl{position:relative;height:14px;border-radius:7px;background:var(--pri2);overflow:hidden}
+#vc-lvl i{position:absolute;inset:0 auto 0 0;width:0;background:#8fb8a8;transition:width .05s}
+#vc-lvl.sp i{background:var(--pri)}
+#vc-lvl b{position:absolute;top:0;bottom:0;width:2px;background:#d9534f}
+[dir=rtl] #vc-lvl{direction:ltr}
+#vc-st{min-height:1.6em;color:var(--mut,#777)}
+.vcctl{display:flex;gap:10px;justify-content:center}
+.vcctl .btn{min-height:52px}
+#vc-go{flex:1;max-width:240px;font-size:17px}
+#vc-opts{text-align:start}
+body.vcopen #mini,body.vcopen #tabs{display:none}
+.btn.vcb{white-space:nowrap}
+.form .lbl{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.btn.mic.on{background:#d9534f;color:#fff;border-color:#d9534f}
+.recrow{display:flex;flex-direction:column;gap:6px}
+.form .lbl{margin:10px 0 4px;font-size:14px;color:var(--mut)}
+.form>textarea{width:100%}
+#vc-opts label{display:block;margin:8px 0 4px;font-size:14px;color:var(--mut)}
 </style>
 </head>
 <body>
@@ -125,6 +153,17 @@ input[type=range]{padding:0;min-height:36px}
     <button data-act="prev" aria-label="previous">⏮</button>
     <button id="d-pp" data-act="pp" aria-label="play pause">▶</button>
     <button data-act="next" aria-label="next">⏭</button>
+  </div>
+</div>
+
+<div id="vc" hidden>
+  <div class="dtop"><div id="vc-t"></div><button class="ib" data-act="vcClose" aria-label="close">✕</button></div>
+  <div class="body">
+    <div id="vc-n" dir="ltr">0 / 0</div>
+    <div id="vc-lvl"><i></i><b></b></div>
+    <div id="vc-st"></div>
+    <div class="vcctl"><button class="btn ghost" data-act="vcMinus">−1</button><button id="vc-go" class="btn" data-act="vcGo"></button><button class="btn ghost" data-act="vcPlus">+1</button></div>
+    <div id="vc-opts" class="form"></div>
   </div>
 </div>
 
@@ -397,6 +436,67 @@ input[type=range]{padding:0;min-height:36px}
     return prog;
   };
 
+  /* ---------- voice counter ---------- */
+  // Arabic normalisation for matching speech-recognition text
+  E.normAr = function (x) {
+    return String(x || '').replace(/[ً-ٰٟۖ-ۭـ﻿]/g, '')
+      .replace(/[آأإٱ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي')
+      .replace(/[^ء-ي0-9a-zA-Z\s]/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+  };
+  var STOP = ['الله', 'اللهم', 'لا', 'يا', 'من', 'في', 'علي', 'الي', 'عن', 'ما', 'بسم', 'ان', 'قد', 'رب'];
+  // keyword = first word (>=3 letters) that is not a common word; fallback first word
+  E.pickKeyword = function (text) {
+    var w = E.normAr(text).split(' ').filter(Boolean);
+    for (var i = 0; i < Math.min(w.length, 8); i++) if (w[i].length >= 3 && STOP.indexOf(w[i]) < 0) return w[i];
+    return w[0] || '';
+  };
+  // whole-word occurrences, allowing a leading و/ف (wa/fa)
+  E.countKeyword = function (transcript, kw) {
+    kw = E.normAr(kw); if (!kw) return 0;
+    var n = 0;
+    E.normAr(transcript).split(' ').forEach(function (w) {
+      if (w === kw || ((w[0] === 'و' || w[0] === 'ف') && w.slice(1) === kw)) n++;
+    });
+    return n;
+  };
+  // Join speech-recognition results; some engines (iOS) repeat earlier text cumulatively in later results
+  E.mergeResults = function (list) {
+    var pieces = [];
+    (list || []).forEach(function (x) {
+      x = String(x || '').trim(); if (!x) return;
+      var last = pieces.length ? E.normAr(pieces[pieces.length - 1]) : null, cur = E.normAr(x);
+      if (last != null && last && cur.indexOf(last) === 0) pieces[pieces.length - 1] = x; else pieces.push(x);
+    });
+    return pieces.join(' ');
+  };
+  // Voice-activity counter: feed RMS levels with timestamps (ms); returns 'count' when one utterance ends.
+  // opts: sens 'low'|'mid'|'high', gap = seconds of silence that ends an utterance, minDur = min speech seconds
+  E.makeVAD = function (opts) {
+    opts = opts || {};
+    var K = { low: 4.5, mid: 3, high: 2 }[opts.sens || 'mid'] || 3;
+    var gapMs = Math.max(150, (opts.gap == null ? 0.6 : opts.gap) * 1000), minMs = (opts.minDur == null ? 0.25 : opts.minDur) * 1000;
+    var floor = null, speaking = false, startT = 0, lastVoice = 0, above = 0, aboveT = 0, minSp = 1;
+    var v = { level: 0, floor: 0, on: 0, speaking: false };
+    v.push = function (rms, t) {
+      if (floor == null) { if (!(rms > 0)) return null; floor = Math.max(rms, 0.002); } // exact 0 = analyser not flowing yet (iOS start-up)
+      var on = Math.max(floor * K, 0.012), off = on * 0.6, ev = null;
+      if (!speaking) {
+        if (rms > on) { if (!above) aboveT = t; above++; if (t - aboveT >= 60) { speaking = true; startT = aboveT; lastVoice = t; minSp = rms; } }
+        else { above = 0; floor = rms < floor ? floor * 0.7 + rms * 0.3 : floor * 0.995 + rms * 0.005; }
+      } else {
+        if (rms < minSp) minSp = rms;
+        if (rms > off) lastVoice = t;
+        else if (t - lastVoice >= gapMs) { speaking = false; above = 0; if (lastVoice - startT >= minMs) ev = 'count'; }
+        // safety: stuck noise (level never dipped for 15 s, or 120 s total) -> no count, re-learn the floor from the lowest level seen
+        if (speaking && ((t - startT > 15000 && minSp > off) || t - startT > 120000)) { speaking = false; above = 0; floor = Math.max(floor, minSp); }
+      }
+      floor = Math.max(floor, 0.0015);
+      v.level = rms; v.floor = floor; v.on = on; v.speaking = speaking;
+      return ev;
+    };
+    return v;
+  };
+
   if (typeof module !== 'undefined' && module.exports) module.exports = E;
   else root.QE = E;
 })(typeof window !== 'undefined' ? window : globalThis);
@@ -504,7 +604,7 @@ window.CONFIG = (function () {
       about: 'عن التطبيق', storage: 'التخزين', clearAudio: 'مسح الصوت المحمّل', backup: 'نسخة احتياطية', export: 'تصدير', import: 'استيراد',
       loadingQ: 'جاري تحميل المصحف', ready: 'جاهز', offlineMissing: 'الصوت غير محمّل ولا يوجد إنترنت', speakTTS: 'قراءة بالصوت الآلي (الشاشة تفضل مفتوحة)',
       drive: 'وضع السواقة', stop: 'إيقاف', next: 'التالي', prev: 'السابق', streak: 'أيام متتالية', openPlayer: 'افتح المشغّل', allQuran: 'تحميل المصحف كامل',
-      dlHelp: 'الصوت بيتحمّل على موبايلك عشان يشتغل أوفلاين.', confirmDel: 'متأكد من الحذف؟', pasteHere: 'الصق رابط أو كود المشاركة هنا', imported: 'تم استيراد', quality: 'جودة الصوت', diagTitle: 'فحص الاتصال والتخزين', diagRun: 'افحص الآن', speed: 'السرعة', pieces: 'قسّم الآية/المقطع إلى', piecesHelp: 'بيقسّم عند أهدأ نقطة قريبة من التقسيم المتساوي', memo: 'وضع الحفظ (فاصل + تقسيم)', impAudio: 'ملف صوت', needDecode: 'التقسيم محتاج وضع الصوت الكامل، اتلغى', seconds: 'ثانية'
+      dlHelp: 'الصوت بيتحمّل على موبايلك عشان يشتغل أوفلاين.', confirmDel: 'متأكد من الحذف؟', pasteHere: 'الصق رابط أو كود المشاركة هنا', imported: 'تم استيراد', quality: 'جودة الصوت', vcBtn: 'عُدّ بصوتي', vcListen: 'بسمعك… قول الذكر وسيب سكتة صغيرة بعد كل مرة', vcPaused: 'المايك واقف', vcAny: 'أي صوت (بدون نت)', vcWords: 'بالكلمات (تجريبي)', vcSens: 'الحساسية', sLow: 'قليلة', sMid: 'متوسطة', sHigh: 'عالية', vcGap: 'السكتة بين كل مرة (ثانية)', vcKw: 'الكلمة اللي بتتعد', vcDone: 'خلصت العدد ✓', vcNoMic: 'المايك مش شغال', vcHint: 'اقفل أي صوت تاني (راديو، موسيقى). السكتة لازم تكون أقصر من الوقفة اللي بتقفها بين كل مرة. لو بيعد أقل: قلّل السكتة أو زوّد الحساسية. لو بيعد زيادة: العكس، وتقدر تصلّح بـ −1.', vcStart: 'شغّل المايك', vcStop: 'وقّف المايك', vcNoSR: 'التعرف على الكلام مش متاح هنا. اختار «أي صوت».', vcNet: 'التعرف على الكلام محتاج إنترنت. اختار «أي صوت» عشان يشتغل من غير نت.', vcInt: 'المايك اتقطع (مكالمة أو Siri). دوس «شغّل المايك» تاني.', speak: 'اكتب بصوتك', dictHint: 'الكتابة بالصوت مش متاحة هنا. دوس على مايك الكيبورد 🎤 وانت في الخانة.', recDua: 'أو سجّل الدعاء بصوتك (يتشغّل في التكرار)', diagTitle: 'فحص الاتصال والتخزين', diagRun: 'افحص الآن', speed: 'السرعة', pieces: 'قسّم الآية/المقطع إلى', piecesHelp: 'بيقسّم عند أهدأ نقطة قريبة من التقسيم المتساوي', memo: 'وضع الحفظ (فاصل + تقسيم)', impAudio: 'ملف صوت', needDecode: 'التقسيم محتاج وضع الصوت الكامل، اتلغى', seconds: 'ثانية'
     },
     en: {
       today: 'Today', quran: 'Quran', library: 'Adhkar & Duas', settings: 'Settings',
@@ -524,7 +624,7 @@ window.CONFIG = (function () {
       about: 'About', storage: 'Storage', clearAudio: 'Clear downloaded audio', backup: 'Backup', export: 'Export', import: 'Import',
       loadingQ: 'Loading the Quran', ready: 'Ready', offlineMissing: 'Audio not downloaded and no internet', speakTTS: 'Read with device voice (keep screen on)',
       drive: 'Drive mode', stop: 'Stop', next: 'Next', prev: 'Previous', streak: 'Day streak', openPlayer: 'Open player', allQuran: 'Download whole Quran',
-      dlHelp: 'Audio downloads to your phone so it works offline.', confirmDel: 'Delete this?', pasteHere: 'Paste a share link or code here', imported: 'Imported', quality: 'Audio quality', diagTitle: 'Connection and storage check', diagRun: 'Run check', speed: 'Speed', pieces: 'Split each ayah/passage into', piecesHelp: 'Cuts at the quietest point near an equal split', memo: 'Memorize mode (gap + split)', impAudio: 'Audio file', needDecode: 'Splitting needs full-audio mode, turned off', seconds: 'sec'
+      dlHelp: 'Audio downloads to your phone so it works offline.', confirmDel: 'Delete this?', pasteHere: 'Paste a share link or code here', imported: 'Imported', quality: 'Audio quality', vcBtn: 'Count by voice', vcListen: 'Listening… say the dhikr with a short pause after each one', vcPaused: 'Mic is off', vcAny: 'Any voice (offline)', vcWords: 'By words (beta)', vcSens: 'Sensitivity', sLow: 'Low', sMid: 'Medium', sHigh: 'High', vcGap: 'Pause between repetitions (s)', vcKw: 'Word being counted', vcDone: 'Count complete ✓', vcNoMic: 'Microphone unavailable', vcHint: 'Turn off other sound (radio, music). The pause setting must be shorter than the pause you leave between repetitions. Under-counting: lower the pause or raise sensitivity. Over-counting: the opposite, and fix with −1.', vcStart: 'Start mic', vcStop: 'Stop mic', vcNoSR: 'Speech recognition is not available here. Choose "Any voice".', vcNet: 'Speech recognition needs internet. Choose "Any voice" to work offline.', vcInt: 'The mic was interrupted (call or Siri). Tap Start mic again.', speak: 'Dictate', dictHint: 'Dictation is not available here. Tap the keyboard mic 🎤 while in the field.', recDua: 'Or record the dua in your voice (used for repetition)', diagTitle: 'Connection and storage check', diagRun: 'Run check', speed: 'Speed', pieces: 'Split each ayah/passage into', piecesHelp: 'Cuts at the quietest point near an equal split', memo: 'Memorize mode (gap + split)', impAudio: 'Audio file', needDecode: 'Splitting needs full-audio mode, turned off', seconds: 'sec'
     }
   };
 
@@ -556,7 +656,7 @@ window.CONFIG = (function () {
   /* ================= state ================= */
   var DEF = {
     lang: 'ar', tr: 'en', reciter: 'husary-muallim', kbps: 128, gapMode: 'auto', gapSeconds: 3, gapFactor: 1, repeatEach: 3, rounds: 1,
-    speed: 1, pieces: 1, memo: true, theme: 'auto', fontScale: 1, morning: { from: '03:30', to: '12:00' }, evening: { from: '15:30', to: '23:59' }, wake: true
+    speed: 1, pieces: 1, memo: true, vcSens: 'mid', vcGap: 0.7, vcMode: 'vad', theme: 'auto', fontScale: 1, morning: { from: '03:30', to: '12:00' }, evening: { from: '15:30', to: '23:59' }, wake: true
   };
   var S = {
     settings: Object.assign({}, DEF, LS.get('settings', {})),
@@ -945,8 +1045,15 @@ window.CONFIG = (function () {
     S.view = Object.assign({ name: name }, params || {});
     render(); window.scrollTo(0, 0);
   }
-  function back() { var v = S.stack.pop(); S.view = v || { name: 'today' }; render(); }
-  function tab(name) { S.stack = []; S.view = { name: name }; render(); window.scrollTo(0, 0); }
+  function leaveEdit() {
+    var v = S.view; if (v.name !== 'edit') return;
+    Dict.stop();
+    var orphan = !v.id && v.newId && !S.duas.some(function (d) { return d.id === v.newId; });
+    Rec.end(orphan);
+    if (orphan) { var rid = 'i:u' + v.newId; DB.del('rec', rid).then(function () { S.recSet.delete(rid); }).catch(function () { }); }
+  }
+  function back() { leaveEdit(); var v = S.stack.pop(); S.view = v || { name: 'today' }; render(); }
+  function tab(name) { leaveEdit(); S.stack = []; S.view = { name: name }; render(); window.scrollTo(0, 0); }
 
   function render() {
     var y = window.scrollY, v = S.view, h = '';
@@ -1023,7 +1130,8 @@ window.CONFIG = (function () {
       if (it.note) h += '<small class="muted">' + esc(L(it.note)) + '</small><br>';
       if (it.source) h += '<small class="muted">' + t('source') + ': ' + esc(it.source) + (it.grade && it.grade !== 'quran' ? ' · ' + esc(it.grade) : '') + '</small>';
       h += '<div class="ctr"><button class="count" dir="ltr" data-act="inc" data-gid="' + gid + '" data-iid="' + esc(it.id) + '" data-target="' + target + '">' + dn + ' / ' + target + '</button>' +
-        '<button class="btn sm ghost" data-act="dec" data-gid="' + gid + '" data-iid="' + esc(it.id) + '" data-target="' + target + '">−</button>';
+        '<button class="btn sm ghost" data-act="dec" data-gid="' + gid + '" data-iid="' + esc(it.id) + '" data-target="' + target + '">−</button>' +
+        '<button class="btn sm vcb" data-act="vc" data-gid="' + gid + '" data-iid="' + esc(it.id) + '">🎤 ' + t('vcBtn') + '</button>';
       if (parts.length) h += '<button class="btn sm" data-act="playItem" data-gid="' + gid + '" data-iid="' + esc(it.id) + '">▶</button>';
       else if (it.kind !== 'quran') h += '<button class="btn sm ghost" data-act="tts" data-gid="' + gid + '" data-iid="' + esc(it.id) + '" title="' + t('speakTTS') + '">🔈</button>';
       if (it.kind !== 'quran') {
@@ -1054,15 +1162,21 @@ window.CONFIG = (function () {
       '<button class="btn ghost" data-act="shareDuas">' + t('share') + '</button><button class="btn ghost" data-act="importDuas">' + t('importDuas') + '</button></div>';
     return h;
   }
+  function micBtn(f, lang) { return '<button type="button" class="btn sm ghost mic" data-act="dict" data-f="' + f + '" data-lang="' + lang + '">🎤 ' + t('speak') + '</button>'; }
   function vEdit() {
-    var id = S.view.id, d = S.duas.filter(function (x) { return x.id === id; })[0] || { title: '', text: '', tr: '', count: 1, when: 'anytime' };
+    var v = S.view, id = v.id, d = S.duas.filter(function (x) { return x.id === id; })[0] || { title: '', text: '', tr: '', count: 1, when: 'anytime' };
+    if (!id) v.newId = v.newId || uid();
+    var eid = id || v.newId, dr = v.draft || {}, val = function (k, x) { return dr[k] != null ? dr[k] : x; };
+    var when = val('f-when', d.when), rid = 'i:u' + eid, has = S.recSet.has(rid);
+    var trLang = /^ar/.test(navigator.language || '') ? 'en-US' : (navigator.language || 'en-US');
     var h = topbar(id ? t('edit') : t('newDua'), true);
-    h += '<div class="form"><label>' + t('title') + '<input id="f-title" value="' + esc(d.title) + '"></label>' +
-      '<label>' + t('text') + '<textarea id="f-text" rows="5" dir="auto">' + esc(d.text) + '</textarea></label>' +
-      '<label>' + t('trText') + '<textarea id="f-tr" rows="3" dir="auto">' + esc(d.tr) + '</textarea></label>' +
-      '<label>' + t('count') + '<input id="f-count" type="number" min="1" max="1000" value="' + (d.count || 1) + '"></label>' +
-      '<label>' + t('when') + '<select id="f-when"><option value="anytime"' + (d.when === 'anytime' ? ' selected' : '') + '>' + t('anytime') + '</option><option value="morning"' + (d.when === 'morning' ? ' selected' : '') + '>' + t('morning') + '</option><option value="evening"' + (d.when === 'evening' ? ' selected' : '') + '>' + t('evening') + '</option></select></label>' +
-      '<div class="btnrow"><button class="btn" data-act="saveDua" data-id="' + esc(id || '') + '">' + t('save') + '</button><button class="btn ghost" data-act="back">' + t('cancel') + '</button></div></div>';
+    h += '<div class="form"><label>' + t('title') + '<input id="f-title" value="' + esc(val('f-title', d.title)) + '"></label>' +
+      '<label class="lbl">' + t('text') + micBtn('f-text', 'ar-SA') + '</label><textarea id="f-text" rows="5" dir="auto">' + esc(val('f-text', d.text)) + '</textarea>' +
+      '<label class="lbl">' + t('trText') + micBtn('f-tr', esc(trLang)) + '</label><textarea id="f-tr" rows="3" dir="auto">' + esc(val('f-tr', d.tr)) + '</textarea>' +
+      '<label>' + t('count') + '<input id="f-count" type="number" min="1" max="1000" value="' + esc(val('f-count', d.count || 1)) + '"></label>' +
+      '<label>' + t('when') + '<select id="f-when"><option value="anytime"' + (when === 'anytime' ? ' selected' : '') + '>' + t('anytime') + '</option><option value="morning"' + (when === 'morning' ? ' selected' : '') + '>' + t('morning') + '</option><option value="evening"' + (when === 'evening' ? ' selected' : '') + '>' + t('evening') + '</option></select></label>' +
+      '<div class="recrow"><small class="muted">' + t('recDua') + '</small><div class="btnrow"><button type="button" class="btn sm ghost" data-act="rec" data-rid="' + esc(rid) + '">' + (has ? '🎙✓' : '🎙') + '</button>' + (has ? '<button type="button" class="btn sm ghost" data-act="delrec" data-rid="' + esc(rid) + '">✕</button>' : '') + '</div></div>' +
+      '<div class="btnrow"><button class="btn" data-act="saveDua" data-id="' + esc(eid) + '">' + t('save') + '</button><button class="btn ghost" data-act="cancelEdit" data-rid="' + (id ? '' : esc(rid)) + '">' + t('cancel') + '</button></div></div>';
     return h;
   }
 
@@ -1225,18 +1339,162 @@ window.CONFIG = (function () {
     add(true, 'ua: ' + navigator.userAgent.slice(0, 90));
   }
 
+  /* ================= voice counter ================= */
+  var SRC = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var VC = {
+    on: false, gid: null, iid: null, target: 1, kw: '',
+    item: function () { var g = this.gid, i = this.iid; return groupItems(g).filter(function (x) { return x.id === i; })[0]; },
+    open: function (gid, iid) {
+      Player.stop(true); TTS.stop(); Dict.stop(); Rec.end();
+      var it = groupItems(gid).filter(function (x) { return x.id === iid; })[0]; if (!it) return;
+      this.gid = gid; this.iid = iid; this.target = it.count || 1; this.kw = QE.pickKeyword(itemText(it)); this._opts = null;
+      $('#vc').hidden = false; document.body.classList.add('vcopen');
+      $('#vc-t').textContent = (it.title || itemText(it) || '').slice(0, 80);
+      this.ui(); this.start();
+    },
+    close: function () { this.stop(); $('#vc').hidden = true; document.body.classList.remove('vcopen'); render(); },
+    count: function () { return done(this.gid, this.iid); },
+    hit: function (k) {
+      var c = this.count(); if (c >= this.target || k <= 0) return;
+      bump(this.gid, this.iid, k, this.target);
+      var n = $('#vc-n'); if (n) { n.classList.remove('flash'); void n.offsetWidth; n.classList.add('flash'); }
+      try { navigator.vibrate && navigator.vibrate(30); } catch (e) { }
+      if (this.count() >= this.target) { this.stop(); this.ui(); toast(t('vcDone')); return; }
+      this.ui();
+    },
+    start: function () {
+      if (this.count() >= this.target) { this.ui(); return; }
+      this.stop(); this.on = true; this.err = '';
+      if (S.settings.wake && navigator.wakeLock) navigator.wakeLock.request('screen').then(function (w) { if (VC.on && !VC.wake) VC.wake = w; else try { w.release(); } catch (e) { } }).catch(function () { });
+      if (S.settings.vcMode === 'sr' && SRC) this.startSR(); else this.startVAD();
+      this.ui();
+    },
+    startVAD: function () {
+      var self = this, AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { this.fail(new Error('no getUserMedia')); return; }
+      try { if (navigator.audioSession) navigator.audioSession.type = 'play-and-record'; } catch (e) { }
+      var ctx = new AC(); this.ctx = ctx; try { var pr = ctx.resume(); if (pr && pr.catch) pr.catch(function () { }); } catch (e) { } // inside the tap (iOS)
+      ctx.onstatechange = function () { if (self.ctx === ctx && self.on && (ctx.state === 'interrupted' || ctx.state === 'closed')) { self.stop(); self.err = t('vcInt'); self.ui(); } };
+      navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: false } }).then(function (stream) {
+        if (!self.on || self.ctx !== ctx) { stream.getTracks().forEach(function (x) { x.stop(); }); return; }
+        self.stream = stream;
+        stream.getTracks().forEach(function (tr) { tr.onended = function () { if (self.stream === stream && self.on) { self.stop(); self.err = t('vcInt'); self.ui(); } }; });
+        var src = ctx.createMediaStreamSource(stream), an = ctx.createAnalyser(); an.fftSize = 1024; src.connect(an);
+        var useF = !!an.getFloatTimeDomainData, buf = useF ? new Float32Array(an.fftSize) : new Uint8Array(an.fftSize);
+        self.vad = QE.makeVAD({ sens: S.settings.vcSens, gap: +S.settings.vcGap });
+        if (ctx.state === 'suspended') { var p2 = ctx.resume(); if (p2 && p2.catch) p2.catch(function () { }); }
+        self.timer = setInterval(function () {
+          var sum = 0;
+          if (useF) { an.getFloatTimeDomainData(buf); for (var i = 0; i < buf.length; i++) sum += buf[i] * buf[i]; }
+          else { an.getByteTimeDomainData(buf); for (var j = 0; j < buf.length; j++) { var x = (buf[j] - 128) / 128; sum += x * x; } }
+          var rms = Math.sqrt(sum / buf.length);
+          if (self.vad.push(rms, performance.now()) === 'count') { self.hit(1); if (!self.on) return; }
+          self.meter();
+        }, 50);
+      }).catch(function (e) { if (self.ctx === ctx) self.fail(e); });
+    },
+    startSR: function () {
+      var self = this, sid = this.sid = (this.sid || 0) + 1; this.restarts = 0;
+      function go() {
+        if (!self.on || self.sid !== sid) return;
+        var r = new SRC(); self.sr = r; var max = 0;
+        r.lang = 'ar-SA'; r.continuous = true; r.interimResults = true;
+        r.onresult = function (e) {
+          if (self.sr !== r) return; self.restarts = 0;
+          var arr = []; for (var i = 0; i < e.results.length; i++) arr.push(e.results[i][0].transcript);
+          var txt = QE.mergeResults(arr), c = QE.countKeyword(txt, self.kw); if (c > max) { self.hit(c - max); max = c; }
+          var st = $('#vc-st'); if (st && self.on) st.textContent = '… ' + txt.trim().split(' ').slice(-6).join(' ');
+        };
+        r.onerror = function (e) {
+          if (self.sr !== r) return;
+          var fatal = { 'not-allowed': 'vcNoSR', 'service-not-allowed': 'vcNoSR', 'audio-capture': 'vcNoSR', 'network': 'vcNet', 'language-not-supported': 'vcNoSR' }[e.error];
+          if (fatal) { self.stop(); self.err = t(fatal); self.ui(); }
+        };
+        r.onend = function () { if (self.on && self.sr === r) { if (++self.restarts > 60) { self.stop(); self.ui(); return; } setTimeout(go, 150); } };
+        try { r.start(); } catch (e) { self.fail(e); }
+      }
+      go();
+    },
+    fail: function (e) { this.stop(); this.err = t('vcNoMic') + ': ' + errMsg(e); this.ui(); },
+    stop: function () {
+      this.on = false; this.sid = (this.sid || 0) + 1; // cancels pending SR restarts
+      if (this.timer) clearInterval(this.timer); this.timer = null;
+      if (this.stream) this.stream.getTracks().forEach(function (x) { x.stop(); }); this.stream = null;
+      if (this.ctx) { try { var pc = this.ctx.close(); if (pc && pc.catch) pc.catch(function () { }); } catch (e) { } } this.ctx = null;
+      try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) { }
+      if (this.sr) { var r = this.sr; this.sr = null; try { r.abort(); } catch (e) { } }
+      if (this.wake) { try { this.wake.release(); } catch (e) { } this.wake = null; }
+      var lv = $('#vc-lvl i'); if (lv) lv.style.width = '0%';
+    },
+    meter: function () {
+      var v = this.vad, lv = $('#vc-lvl i'), th = $('#vc-lvl b'); if (!v || !lv) return;
+      var sc = function (x) { return Math.max(0, Math.min(100, Math.round(Math.sqrt(x / 0.25) * 100))); };
+      lv.style.width = sc(v.level) + '%'; th.style.left = sc(v.on) + '%'; lv.parentNode.classList.toggle('sp', v.speaking);
+    },
+    ui: function () {
+      var el = $('#vc'); if (!el || el.hidden) return;
+      var st = S.settings, c = this.count(), fin = c >= this.target, sr = st.vcMode === 'sr' && SRC;
+      $('#vc-n').textContent = c + ' / ' + this.target;
+      $('#vc-n').classList.toggle('fin', fin);
+      $('#vc-st').textContent = this.err || (fin ? t('vcDone') : this.on ? (sr ? '…' : t('vcListen')) : t('vcPaused'));
+      $('#vc-go').textContent = this.on ? '⏸ ' + t('vcStop') : '🎤 ' + t('vcStart');
+      $('#vc-go').disabled = fin;
+      var seg = function (act, list, cur) { return '<div class="seg sm">' + list.map(function (o) { return '<button class="' + (String(o[0]) === String(cur) ? 'on' : '') + '" data-act="' + act + '" data-v="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>'; };
+      var oh =
+        (SRC ? seg('vcMode', [['vad', t('vcAny')], ['sr', t('vcWords')]], sr ? 'sr' : 'vad') : '') +
+        (sr ? '<label>' + t('vcKw') + '<input id="vc-kw" dir="rtl" value="' + esc(this.kw) + '"></label>'
+          : '<label>' + t('vcSens') + '</label>' + seg('vcSens', [['low', t('sLow')], ['mid', t('sMid')], ['high', t('sHigh')]], st.vcSens) +
+            '<label>' + t('vcGap') + '</label>' + seg('vcGap', [[0.4, '0.4'], [0.7, '0.7'], [1, '1'], [1.5, '1.5'], [2.5, '2.5'], [4, '4']], st.vcGap)) +
+        '<small class="muted">' + t('vcHint') + '</small>';
+      if (oh !== this._opts) { $('#vc-opts').innerHTML = oh; this._opts = oh; }
+      $('#vc-lvl').style.visibility = sr ? 'hidden' : '';
+    }
+  };
+  document.addEventListener('visibilitychange', function () { if (document.hidden) { if (VC.on) { VC.stop(); VC.ui(); } Dict.stop(); } });
+
+  /* ================= dictation (speech to text) ================= */
+  var Dict = {
+    r: null, f: null,
+    toggle: function (fid, lang, btn) {
+      if (this.r) { var same = this.f === fid; this.stop(); if (same) return; }
+      var fld = $('#' + fid); if (!fld) return;
+      if (!SRC) { toast(t('dictHint')); fld.focus(); return; }
+      Player.stop(true); TTS.stop(); Rec.end(false);
+      var r = new SRC(), self = this, base = fld.value.replace(/\s+$/, '');
+      r.lang = lang || 'ar-SA'; r.continuous = true; r.interimResults = true;
+      this.r = r; this.f = fid; btn.classList.add('on'); btn.textContent = '⏹ ' + t('speak');
+      r.onresult = function (e) {
+        var arr = []; for (var i = 0; i < e.results.length; i++) arr.push(e.results[i][0].transcript);
+        var txt = QE.mergeResults(arr);
+        fld.value = (base ? base + ' ' : '') + txt.trim(); draft(fld);
+      };
+      r.onerror = function (e) { if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { toast(t('dictHint')); fld.focus(); } };
+      r.onend = function () { if (self.r === r) self.stop(); };
+      try { r.start(); } catch (e) { this.stop(); toast(t('dictHint')); }
+    },
+    stop: function () {
+      var r = this.r; this.r = null; this.f = null; if (r) { try { r.stop(); } catch (e) { } }
+      document.querySelectorAll('[data-act=dict].on').forEach(function (b) { b.classList.remove('on'); b.textContent = '🎤 ' + t('speak'); });
+    }
+  };
+  function draft(el) { if (S.view.name === 'edit' && el.id && el.id.indexOf('f-') === 0) { S.view.draft = S.view.draft || {}; S.view.draft[el.id] = el.value; } }
+  document.addEventListener('input', function (e) { draft(e.target); });
+  document.addEventListener('change', function (e) { draft(e.target); if (e.target.id === 'vc-kw') VC.kw = QE.normAr(e.target.value).split(' ')[0] || VC.kw; });
+
   /* ================= recording ================= */
   var Rec = {
-    mr: null, chunks: [], rid: null,
+    mr: null, chunks: [], rid: null, discard: false,
+    end: function (discard) { if (this.mr && this.mr.state === 'recording') { this.discard = !!discard; try { this.mr.stop(); } catch (e) { } } },
     async toggle(rid) {
       if (this.mr && this.mr.state === 'recording') { this.mr.stop(); return; }
-      try {
+      Dict.stop(); try {
         var stream = await navigator.mediaDevices.getUserMedia({ audio: true }), self = this;
         var mime = window.MediaRecorder && MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : '';
         this.mr = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream); this.chunks = []; this.rid = rid;
         this.mr.ondataavailable = function (e) { if (e.data && e.data.size) self.chunks.push(e.data); };
         this.mr.onstop = async function () {
           stream.getTracks().forEach(function (tr) { tr.stop(); });
+          if (self.discard) { self.discard = false; return; }
           var type = self.mr.mimeType || mime || 'audio/webm', blob = new Blob(self.chunks, { type: type });
           await DB.put('rec', self.rid, { buf: await blob.arrayBuffer(), mime: type }); S.recSet.add(self.rid); toast(t('saved')); render();
         };
@@ -1270,11 +1528,20 @@ window.CONFIG = (function () {
     if (a === 'playItem') return playGroup(D.gid, D.iid);
     if (a === 'tts') { var it = groupItems(D.gid).filter(function (x) { return x.id === D.iid; })[0]; if (it) { var left = Math.max(1, (it.count || 1) - done(D.gid, it.id)); Player.stop(true); $('#mini').hidden = false; $('#mini-t').textContent = L(groupMeta(D.gid).names); TTS.run(itemText(it), left, function () { bump(D.gid, it.id, 1, it.count || 1); render(); }); } return; }
     if (a === 'rec') return Rec.toggle(D.rid);
+    if (a === 'vc') return VC.open(D.gid, D.iid);
+    if (a === 'vcClose') return VC.close();
+    if (a === 'vcGo') { if (VC.on) { VC.stop(); VC.ui(); } else VC.start(); return; }
+    if (a === 'vcPlus') return VC.hit(1);
+    if (a === 'vcMinus') { bump(VC.gid, VC.iid, -1, VC.target); return VC.ui(); }
+    if (a === 'vcMode' || a === 'vcSens' || a === 'vcGap') { S.settings[a] = a === 'vcGap' ? +D.v : D.v; saveSettings(); if (VC.on) VC.start(); else VC.ui(); return; }
+    if (a === 'dict') return Dict.toggle(D.f, D.lang, el);
+    if (a === 'cancelEdit') { Dict.stop(); Rec.end(!!D.rid); if (D.rid) DB.del('rec', D.rid).then(function () { S.recSet.delete(D.rid); }).catch(function () { }); return back(); }
     if (a === 'delrec') { if (confirm(t('confirmDel'))) DB.del('rec', D.rid).then(function () { S.recSet.delete(D.rid); render(); }); return; }
     if (a === 'editDua') return go('edit', { id: D.id });
     if (a === 'delDua') { if (confirm(t('confirmDel'))) { S.duas = S.duas.filter(function (x) { return x.id !== D.id; }); saveDuas(); DB.del('rec', 'i:u' + D.id).then(function () { S.recSet.delete('i:u' + D.id); }).catch(function () { }); render(); } return; }
     if (a === 'saveDua') {
-      var text = $('#f-text').value.trim(); if (!text) return toast(t('failed'));
+      Dict.stop(); var text = $('#f-text').value.trim(); if (!text) return toast(t('failed'));
+      Rec.end();
       var d = { id: D.id || uid(), title: $('#f-title').value.trim(), text: text, tr: $('#f-tr').value.trim(), count: QE.clamp(parseInt($('#f-count').value, 10) || 1, 1, 1000), when: $('#f-when').value };
       var i = S.duas.findIndex(function (x) { return x.id === d.id; }); if (i >= 0) S.duas[i] = d; else S.duas.push(d);
       saveDuas(); toast(t('saved')); return back();
@@ -1378,7 +1645,7 @@ window.CONFIG = (function () {
     setInterval(function () { if (S.view.name === 'today' && !document.hidden) render(); }, 60000);
     if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) navigator.serviceWorker.register('sw.js').catch(function () { });
   }
-  window.__app = { S: S, Player: Player, render: render, go: go };
+  window.__app = { S: S, Player: Player, render: render, go: go, VC: VC, Dict: Dict, Rec: Rec };
   boot();
 })();
 </script>
